@@ -4,16 +4,17 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#0a1522">
-<title>CYBER OUTBREAK v0.6 | 病院サイバーリスク・シミュレーション</title>
+<title>CYBER OUTBREAK v0.7 | 病院サイバーリスク・シミュレーション</title>
 <link rel="stylesheet" href="./css/styles.css">
 <link rel="stylesheet" href="./css/drawer.css">
 <link rel="stylesheet" href="./css/mobile.css">
 <link rel="stylesheet" href="./css/tutorial.css">
+<link rel="stylesheet" href="./css/progression.css">
 </head>
 <body>
 <div class="wrap">
 <header class="topbar">
-  <div class="brand"><div class="brand-mark"><svg viewBox="0 0 50 50" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="M25 4l17 10v21L25 46 8 35V14z"/><path d="M25 12l11 6v14l-11 7-11-7V18z" opacity=".55"/><path d="M25 18v16M17 26h16" stroke-width="3"/><circle cx="25" cy="26" r="18" stroke-dasharray="2 5" opacity=".35"/></svg></div><div><div class="brand-micro">SIMULATION / TACTICAL INTERFACE</div><h1>CYBER <span>OUTBREAK</span><small>v0.6</small></h1><div class="tagline">架空病院 × 情報資産 × ターン制ストラテジー</div></div></div>
+  <div class="brand"><div class="brand-mark"><svg viewBox="0 0 50 50" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="M25 4l17 10v21L25 46 8 35V14z"/><path d="M25 12l11 6v14l-11 7-11-7V18z" opacity=".55"/><path d="M25 18v16M17 26h16" stroke-width="3"/><circle cx="25" cy="26" r="18" stroke-dasharray="2 5" opacity=".35"/></svg></div><div><div class="brand-micro">SIMULATION / TACTICAL INTERFACE</div><h1>CYBER <span>OUTBREAK</span><small>v0.7</small></h1><div class="tagline">架空病院 × 情報資産 × ターン制ストラテジー</div></div></div>
   <div class="head-actions"><span class="top-pill"><span class="led"></span> OFFLINE SIMULATION <span class="mono">/ 100% LOCAL</span></span><button type="button" class="small-btn" id="helpBtn">ルール</button><button type="button" class="small-btn" id="restartBtn">最初から</button></div>
 </header>
 
@@ -25,7 +26,7 @@
   <div class="hero-right"><div class="dial" id="alertDial"><div class="dial-inner"><strong id="alertDialNumber">08</strong><small>ALERT</small></div></div><div class="hero-info"><small>DEFENSE STATUS</small><strong id="defenseStage">通常監視</strong><span id="briefCycle">TURN 01 / 12</span></div></div>
 </section>
 <div class="pulse-strip" role="status" aria-live="polite"><span class="pulse-icon">⌁</span><span class="pulse-label">LIVE REPORT</span><span class="pulse-text" id="pulseText">演習の開始を待機中です。</span><span class="pulse-index" id="pulseTurn">T--</span></div>
-<div class="tactical-toolbar" aria-label="戦術コマンド"><span class="tactical-label"><b>TACTICAL CONTROL</b><small>ショップと強化を開く</small></span><div class="tactical-buttons"><button class="tactical-btn" id="openShopBtn" data-panel="shop" type="button" aria-controls="controlDrawer" aria-expanded="false">◈ 戦術ショップ</button><button class="tactical-btn" id="openUpgradeBtn" data-panel="upgrade" type="button" aria-controls="controlDrawer" aria-expanded="false">⬡ 進化・強化</button></div><strong class="tactical-balance" id="shopHeaderPoints">0 IP</strong></div>
+<div class="tactical-toolbar" aria-label="戦術コマンド"><span class="tactical-label"><b>TACTICAL CONTROL</b><small>ショップと強化を開く</small></span><div class="tactical-buttons"><button class="tactical-btn" id="openShopBtn" data-panel="shop" type="button" aria-controls="controlDrawer" aria-expanded="false">◈ 戦術ショップ</button><button class="tactical-btn" id="openUpgradeBtn" data-panel="upgrade" type="button" aria-controls="controlDrawer" aria-expanded="false">⬡ 進化・強化</button><button class="tactical-btn" id="openResearchBtn" data-panel="research" type="button" aria-controls="controlDrawer" aria-expanded="false">◆ 永続研究</button></div><strong class="tactical-balance" id="shopHeaderPoints">0 IP</strong><strong class="tactical-balance rp-header" id="metaHeaderRP">0 RP</strong></div>
 <nav class="quicknav" aria-label="ゲーム画面内の移動"><a href="#mapSection"><span class="nav-number">01</span> ネットワーク</a><a href="#inspectorSection"><span class="nav-number">02</span> ノード操作</a><a href="#awardsSection"><span class="nav-number">03</span> 実績</a><a href="#activitySection"><span class="nav-number">04</span> 通信ログ</a></nav>
 <div class="stat-grid" aria-label="戦況統計">
   <section class="panel stat"><span class="stat-ornament" aria-hidden="true">⌁</span><div class="stat-label">AVAILABLE POINTS / 所持IP</div><div class="stat-value teal" id="pointsVal">0 IP</div><div class="stat-detail" id="incomeHint">アップグレードに使用</div><div class="stat-track"></div></section>
@@ -38,7 +39,7 @@
   <button type="button" data-landscape-view="node" aria-pressed="true">ノード</button>
   <button type="button" data-landscape-view="mission" aria-pressed="false">戦況</button>
   <button type="button" data-landscape-view="log" aria-pressed="false">ログ</button>
-  <button type="button" data-landscape-view="awards" aria-pressed="false">実績</button>
+  <button type="button" data-landscape-view="awards" aria-pressed="false">実績</button><button type="button" data-landscape-view="opportunity" aria-pressed="false">好機</button>
 </div>
   <div class="left-stack">
     <section class="panel map-panel" id="mapSection">
@@ -53,22 +54,37 @@
       <div class="bar-head"><span>模擬データ獲得</span><strong id="goalIPText">0 / 110 IP</strong></div><div class="progress"><div id="goalIPBar"></div></div>
       <div class="bar-head"><span>影響ノード</span><strong id="goalNodeText">1 / 5</strong></div><div class="progress"><div id="goalNodeBar"></div></div>
       <div class="bar-head"><span>病院側の警戒レベル</span><strong id="alertText">8 / 100</strong></div><div class="progress alert"><div id="alertBar"></div></div>
-      <div class="status-chips" id="statusChips"></div><div class="notice" id="alertMessage">病院側はまだ通常監視中です。警戒度が100になると封じ込められます。</div>
+      
+<div class="maturity-summary"><div class="maturity-title"><strong id="hospitalLabel">B：標準管理病院</strong><span id="maturityScore">成熟度 --</span></div><div class="maturity-bars" id="maturityBars"></div></div>
+<div class="impact-summary" id="impactSummary" aria-label="病院影響のゲーム指標">
+ <div class="impact-head"><div><span class="section-badge">IMPACT / FICTIONAL</span><h3>病院影響指数 HI</h3></div><strong id="hiValue">0 / 100</strong></div>
+ <div class="impact-visual"><span id="hiBar"></span></div>
+ <div class="impact-metrics"><span>情報 <b id="impactInfo">0</b></span><span>システム <b id="impactSystems">0</b></span><span>経済 <b id="impactFinancial">0</b></span><span>診療 <b id="impactCare">0</b></span></div>
+ <p class="impact-care">診療継続率 <strong id="continuityValue">100%</strong> · 仮想損失額 <strong id="virtualLoss">0万円</strong></p>
+ <p class="impact-note">HIは架空の影響指数です。患者への直接的被害は得点化せず、実在の損害額を推計するものではありません。</p>
+</div><div class="status-chips" id="statusChips"></div><div class="notice" id="alertMessage">病院側はまだ通常監視中です。警戒度が100になると封じ込められます。</div>
     </section>
     <section class="panel activity" id="activitySection"><div class="section-header"><h2>イベントログ</h2><span class="section-badge">EVENT STREAM</span></div><div class="feed" id="feed" aria-live="polite"></div></section>
   </div>
   <div class="right-stack">
     <section class="panel detail" id="inspectorSection"><div class="section-header"><h2>ノード・インスペクター</h2><span class="section-badge">SELECTED NODE</span></div><div id="detailContent"></div><div class="btn-row"><button class="secondary" type="button" id="endTurnBtn">ターン終了</button><button class="secondary" type="button" id="guideBtn">遊び方</button></div></section>
     
-    <section class="panel awards" id="awardsSection"><div class="awards-heading"><div><h2>アチーブメント</h2><p class="sub">隠し資料と戦略実績を収集。取得状況はこのブラウザだけに保存。</p></div><span class="pill" id="badgeCount">0 / 12</span></div><div class="award-progress"><span id="awardBar"></span></div><div class="award-filters" aria-label="実績表示を切り替える"><button class="filter-btn" data-award-filter="all" aria-pressed="true">すべて</button><button class="filter-btn" data-award-filter="earned" aria-pressed="false">獲得済み</button><button class="filter-btn" data-award-filter="locked" aria-pressed="false">未発見</button></div><div class="award-grid" id="achievementList"></div><button type="button" class="small-btn" id="clearAwardsBtn">実績の記録をリセット</button></section><section class="panel howto"><h2>ゲームの操作</h2><p><b style="color:#eaf4ff">①</b> 緑のノードで模擬データを回収 → <b style="color:#eaf4ff">②</b> 青いノードへ影響を広げる → <b style="color:#eaf4ff">③</b> 継続収入や要求イベントを選択 → <b style="color:#eaf4ff">④</b> 進化に投資 → <b style="color:#eaf4ff">⑤</b> ターン終了。病院側も経路遮断や復旧を実行します。</p><p>防御との関係を学ぶための抽象ゲームです。現実の侵入方法・個人情報・外部通信は含みません。</p></section>
+    
+<section class="panel opportunity-panel" id="opportunitySection" aria-labelledby="opportunityHeading">
+ <div class="section-header"><h2 id="opportunityHeading">突然の好機</h2><span class="section-badge" id="opportunityBadge">OPPORTUNITY</span></div>
+ <p class="sub" id="opportunityIntro">管理水準に応じて、期間限定の好機が発生します。</p>
+ <div id="opportunityBody" class="opportunity-body" aria-live="polite"><p>現在は好機の発生を待っています。</p></div>
+ <div class="opportunity-actions"><button type="button" class="primary" id="opportunityUseBtn" disabled>好機を活用 / 1 AP</button><button type="button" class="secondary" id="opportunityPassBtn" disabled>見送る</button></div>
+</section>
+<section class="panel awards" id="awardsSection"><div class="awards-heading"><div><h2>アチーブメント</h2><p class="sub">隠し資料と戦略実績を収集。取得状況はこのブラウザだけに保存。</p></div><span class="pill" id="badgeCount">0 / 12</span></div><div class="award-progress"><span id="awardBar"></span></div><div class="award-filters" aria-label="実績表示を切り替える"><button class="filter-btn" data-award-filter="all" aria-pressed="true">すべて</button><button class="filter-btn" data-award-filter="earned" aria-pressed="false">獲得済み</button><button class="filter-btn" data-award-filter="locked" aria-pressed="false">未発見</button></div><div class="award-grid" id="achievementList"></div><button type="button" class="small-btn" id="clearAwardsBtn">実績の記録をリセット</button></section><section class="panel howto"><h2>ゲームの操作</h2><p><b style="color:#eaf4ff">①</b> 緑のノードで模擬データを回収 → <b style="color:#eaf4ff">②</b> 青いノードへ影響を広げる → <b style="color:#eaf4ff">③</b> 継続収入や要求イベントを選択 → <b style="color:#eaf4ff">④</b> 進化に投資 → <b style="color:#eaf4ff">⑤</b> ターン終了。病院側も経路遮断や復旧を実行します。</p><p>防御との関係を学ぶための抽象ゲームです。現実の侵入方法・個人情報・外部通信は含みません。</p></section>
   </div>
 </div>
-<div class="note-footer">CYBER OUTBREAK / TACTICAL CONSOLE v0.6 — EDUCATIONAL FICTION　｜　完全ローカル動作・データ送信なし</div>
+<div class="note-footer">CYBER OUTBREAK / TACTICAL CONSOLE v0.7 — EDUCATIONAL FICTION　｜　完全ローカル動作・データ送信なし</div>
 </div>
 <button class="drawer-backdrop" id="drawerBackdrop" type="button" tabindex="-1" aria-label="パネルを閉じる"></button>
 <aside class="control-drawer" id="controlDrawer" role="dialog" aria-modal="true" aria-labelledby="drawerTitle" aria-hidden="true" inert>
   <header class="drawer-head"><div><span id="drawerKicker" class="drawer-kicker">TACTICAL SHOP</span><h2 id="drawerTitle">戦術ショップ</h2></div><button class="drawer-close" id="closeDrawerBtn" type="button" aria-label="閉じる">×</button></header>
-  <div class="drawer-balance"><span>AVAILABLE POINTS</span><strong id="shopIpBalance">0 IP</strong></div>
+  <div class="drawer-balance"><span id="drawerBalanceLabel">AVAILABLE POINTS</span><strong id="shopIpBalance">0 IP</strong></div>
   <div class="drawer-scroll">
     <section class="drawer-view" data-panel-view="shop" aria-label="ショップ">
       <p class="drawer-intro">選択中：<strong id="shopNodeName">外縁ゲート</strong>。購入・行動後はマップに戻ります。</p><div class="drawer-shop-list" id="shopItems"></div>
@@ -78,6 +94,14 @@
       <p class="drawer-intro">模擬情報ポイントを使って能力を最大Lv.3まで強化できます。</p><div class="upgrade-list" id="upgrades"></div>
       <p class="drawer-note">数値はゲーム内だけのもので、現実の安全性や攻撃能力を示しません。</p>
     </section>
+  
+<section class="drawer-view" data-panel-view="research" aria-label="永続研究" hidden>
+ <p class="drawer-intro"><strong>RP（研究ポイント）</strong>を消費し、次回以降の攻略で使える恒久研究を解放します。現在の攻略には即時反映されません。</p>
+ <div class="research-list" id="researchItems"></div>
+ <p class="drawer-note">新しい実績、攻略の達成・失敗によってRPを獲得。途中リタイアや練習中の報酬は対象外です。</p>
+ <div class="save-tools"><button type="button" class="small-btn" id="exportMetaBtn">研究データを保存</button><button type="button" class="small-btn" id="importMetaBtn">JSONから復元</button><input id="importMetaFile" type="file" accept=".json,application/json" hidden></div>
+ <p class="drawer-note">RPと研究レベルはブラウザ内に保存。端末変更時はJSONの保存と復元を利用できます。</p>
+</section>
   </div>
   <footer class="drawer-foot">● 100% OFFLINE · ターン制のため表示中に時間は進みません</footer>
 </aside>
@@ -100,20 +124,21 @@
   <div class="tutorial-guide-actions"><span id="tutorialStatus">指定された場所をタップ</span><button type="button" id="tutorialSkipBtn">チュートリアル終了</button></div>
 </section>
 <div class="overlay" id="intro" role="dialog" aria-modal="true" aria-labelledby="introTitle">
-  <div class="modal"><div class="modal-symbol">⬡</div><div class="overline">OPERATION / GRID ZERO ・ V0.6</div><h2 id="introTitle">CYBER OUTBREAK</h2>
+  <div class="modal"><div class="modal-symbol">⬡</div><div class="overline">OPERATION / GRID ZERO ・ V0.7</div><h2 id="introTitle">CYBER OUTBREAK</h2>
   <p>架空の医療情報ネットワークに影響を広げるターン制戦略ゲーム。模擬データの回収に加えて、仮想サーバーの継続収入や架空の要求イベントも使える戦略ゲーム。病院側は経路遮断や復旧で対抗します。</p>
   <ul><li>「外縁ゲート」から始め、接続が開いている隣接ノードへ進みます。</li><li>選択済みのノードから模擬データを回収し、継続収入設備や進化に投資します。</li><li>病院側は接続を遮断・復旧できます。警戒度100またはターン超過で敗北。隠し実績も探しましょう。</li></ul>
   <div class="difficulty"><label for="difficulty">ゲーム難易度</label><select id="difficulty"><option value="casual">カジュアル — 初めてでも遊びやすい</option><option value="normal" selected>スタンダード — ほどよい駆け引き</option><option value="hard">チャレンジ — 判断が重要</option></select></div>
-  <div class="launch-actions"><button class="secondary tutorial-launch" id="tutorialStartBtn" type="button">初心者向けチュートリアル</button><button class="primary" id="startBtn" type="button">ゲーム開始 →</button></div><button class="secondary" id="continueBtn" type="button" hidden style="margin-top:9px">現在のゲームに戻る</button><p class="fineprint">現実の侵入経路・手順は扱いません。病院や患者に関する情報は全て架空です。</p></div>
+  <div class="difficulty"><label for="hospitalProfile">病院の管理体制（すべて架空）</label><select id="hospitalProfile"><option value="A">A：高度管理 — 好機はまれ</option><option value="B" selected>B：標準管理 — 部門差あり</option><option value="C">C：改善途上 — 好機は多め</option><option value="D">D：管理が不十分 — 好機は多い</option></select></div><p class="meta-intro" id="metaIntro">研究ポイント：0 RP ／ 永続研究は次回から反映</p><div class="launch-actions"><button class="secondary tutorial-launch" id="tutorialStartBtn" type="button">初心者向けチュートリアル</button><button class="primary" id="startBtn" type="button">ゲーム開始 →</button></div><button class="secondary" id="continueBtn" type="button" hidden style="margin-top:9px">現在のゲームに戻る</button><p class="fineprint">現実の侵入経路・手順は扱いません。病院や患者に関する情報は全て架空です。</p></div>
 </div>
 <div id="toast" role="status" aria-live="polite"></div>
 <div class="overlay" id="result" role="dialog" aria-modal="true" aria-labelledby="resultTitle" hidden>
   <div class="modal"><div class="modal-symbol" id="resultIcon">★</div><div class="overline" id="resultLabel">MISSION COMPLETE</div><h2 id="resultTitle">ミッション達成</h2><p id="resultLead"></p>
   <div class="end-summary"><div><strong id="resultData">0</strong><small>累計獲得IP</small></div><div><strong id="resultNodes">0</strong><small>影響ノード</small></div><div><strong id="resultTurns">0</strong><small>経過ターン</small></div></div>
-  <div class="debrief"><b>防御の視点から振り返る</b><p id="debriefText">対策の効果を確認しましょう。</p></div>
+  <div class="result-additional"><span>今回獲得した研究ポイント <b id="resultRP">0 RP</b></span><span>病院影響指数 <b id="resultHI">0 / 100</b></span><span>診療継続率 <b id="resultCare">100%</b></span><span>仮想損失額（ゲーム内） <b id="resultLoss">0万円</b></span></div><div class="debrief"><b>防御の視点から振り返る</b><p id="debriefText">対策の効果を確認しましょう。</p></div>
   <button class="primary" type="button" id="againBtn">もう一度プレイ →</button><p class="fineprint">このスコアはゲーム上のもので、実在する医療機関の安全性の指標ではありません。</p></div>
 </div>
 <script src="./js/game-data.js" defer></script>
+<script src="./js/progression.js" defer></script>
 <script src="./js/app.js" defer></script>
 <script src="./js/layout.js" defer></script>
 <script src="./js/tutorial.js" defer></script>

@@ -8,7 +8,7 @@
  const viewButtons=[...document.querySelectorAll('[data-landscape-view]')];
  const expandButton=document.getElementById('mapMaximizeBtn');
  function setPanel(name){
-  if(!['node','mission','log','awards'].includes(name))return;
+  if(!['node','mission','log','awards','opportunity'].includes(name))return;
   game.dataset.landscapeTab=name;
   game.dataset.mapOnly='false';
   expandButton.setAttribute('aria-pressed','false');

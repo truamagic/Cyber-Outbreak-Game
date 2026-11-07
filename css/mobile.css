@@ -91,11 +91,12 @@
     background:#152c3f;color:#afcadd;font-size:10px;font-weight:750
   }
   .landscape-tabs button[aria-pressed="true"]{background:#23545b;border-color:#68d5c3;color:#e4fff8}
-  .main #inspectorSection,.main #missionSection,.main #activitySection,.main #awardsSection{display:none!important}
+  .main #inspectorSection,.main #missionSection,.main #activitySection,.main #awardsSection,.main #opportunitySection{display:none!important}
   .main[data-landscape-tab="node"] #inspectorSection,
   .main[data-landscape-tab="mission"] #missionSection,
   .main[data-landscape-tab="log"] #activitySection,
-  .main[data-landscape-tab="awards"] #awardsSection{
+  .main[data-landscape-tab="awards"] #awardsSection,
+  .main[data-landscape-tab="opportunity"] #opportunitySection{
     display:block!important;grid-area:detail;min-height:0;max-height:100%;overflow-y:auto;overflow-x:hidden;
     width:100%;padding:10px;border-radius:11px;scrollbar-width:thin;overscroll-behavior:contain
   }
@@ -104,7 +105,8 @@
   .main[data-map-only="true"] #inspectorSection,
   .main[data-map-only="true"] #missionSection,
   .main[data-map-only="true"] #activitySection,
-  .main[data-map-only="true"] #awardsSection{display:none!important}
+  .main[data-map-only="true"] #awardsSection,
+  .main[data-map-only="true"] #opportunitySection{display:none!important}
   #inspectorSection .section-header{margin-bottom:7px}
   #inspectorSection .section-header h2{font-size:12px}
   #inspectorSection .section-badge{display:none}
@@ -158,4 +160,14 @@
   .main .map-panel .p-head{padding:4px 7px 2px}
   .main .map-panel .map-maximize-btn{min-height:23px;padding:3px 5px}
   .landscape-tabs button{font-size:9px}
+}
+
+@media (orientation:landscape) and (max-height:600px) and (max-width:1100px) and (pointer:coarse){
+ .landscape-tabs button{font-size:9px}
+ .main[data-landscape-tab="opportunity"] #opportunitySection{padding:10px}
+ .tactical-buttons{grid-template-columns:repeat(3,minmax(0,1fr))}
+ .tactical-btn{font-size:10px;padding:5px 3px}
+ .opportunity-actions{gap:6px}
+ .opportunity-actions button{min-height:34px;padding:7px 6px;font-size:10px}
+ .result-additional{grid-template-columns:repeat(2,1fr);gap:5px}
 }

@@ -36,7 +36,10 @@ const MILESTONES=[
 {id:'stream',name:'定期収入',desc:'継続収入ユニットでポイントを獲得',icon:'◷'},
 {id:'demand',name:'交渉の結果',desc:'要求イベントでポイントを獲得',icon:'!'},
 {id:'reconnect',name:'分断を越えて',desc:'ネットワーク分離の解消を確認した',icon:'⌁'},
-{id:'victory',name:'ミッション達成',desc:'いずれかの難易度で勝利',icon:'★'}
+{id:'victory',name:'ミッション達成',desc:'いずれかの難易度で勝利',icon:'★'},
+{id:'firstOpportunity',name:'偶然の好機',desc:'期間限定の好機を活用した',icon:'✦'},
+{id:'firstResearch',name:'長期研究',desc:'RPで永続研究を解放した',icon:'◆'},
+{id:'secureClear',name:'堅牢な病院への挑戦',desc:'高度管理病院Aでミッションを達成',icon:'⬡'}
 ];
 
 window.CyberOutbreakData=Object.freeze({EDGES,MAP,RULES,UPGRADES,ARTIFACTS,MILESTONES});

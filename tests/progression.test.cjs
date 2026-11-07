@@ -1,0 +1,47 @@
+/* node tests/progression.test.cjs */
+'use strict';
+const assert=require('node:assert/strict');
+const fs=require('node:fs');
+const path=require('node:path');
+const vm=require('node:vm');
+const source=fs.readFileSync(path.join(__dirname,'..','js','progression.js'),'utf8');
+const sandbox={window:{}};
+vm.runInNewContext(source,sandbox,{filename:'progression.js'});
+const P=sandbox.window.CyberOutbreakProgression;
+assert.equal(Object.keys(P.PROFILES).length,4);
+assert.equal(P.FIELDS.length,5);
+const a=P.initialMaturity('A',()=>0.5);
+const d=P.initialMaturity('D',()=>0.5);
+assert.ok(P.averageMaturity(a)>P.averageMaturity(d));
+assert.ok(P.opportunityChance(a)>0);
+assert.ok(P.opportunityChance(a)<P.opportunityChance(d));
+assert.ok(P.opportunityChance(d)<=0.62);
+for(const event of P.OPPORTUNITIES){
+ assert.ok(P.FIELDS.some(f=>f.key===event.domain));
+ assert.ok(event.bonus>0&&event.alert>0);
+}
+assert.equal(P.impactIndex({info:100,systems:0,financial:0,care:0}),35);
+assert.equal(P.impactIndex({info:0,systems:100,financial:100,care:100}),65);
+assert.equal(P.careContinuity({info:100,systems:0,financial:0,care:0}),100);
+assert.ok(P.careContinuity({info:0,systems:50,financial:0,care:50})<100);
+assert.equal(P.runReward(true,4,20,'A',true),33);
+assert.equal(P.runReward(false,4,20,'B',false),3);
+assert.equal(P.runReward(false,1,0,'B',false),0);
+const cache=new Map();
+const storage={getItem:k=>cache.get(k)||null,setItem:(k,v)=>cache.set(k,v)};
+const meta=P.emptyMeta();meta.rp=97;meta.levels.funding=2;meta.firstClears.A=true;meta.runs=4;
+assert.equal(P.saveMeta(meta,storage),true);
+const loaded=P.loadMeta(storage);
+assert.equal(loaded.rp,97);
+assert.equal(loaded.levels.funding,2);
+assert.equal(loaded.firstClears.A,true);
+assert.equal(loaded.runs,4);
+const unsafe=P.sanitizeMeta({rp:999999999,runs:-200,levels:{funding:999,initiative:98,forecast:-30,readiness:1},firstClears:{A:1,B:true}});
+assert.equal(unsafe.rp,100000);
+assert.equal(unsafe.runs,0);
+assert.equal(unsafe.levels.funding,3);
+assert.equal(unsafe.levels.initiative,1);
+assert.equal(unsafe.levels.forecast,0);
+assert.equal(unsafe.firstClears.A,false);
+assert.equal(unsafe.firstClears.B,true);
+console.log('Progression tests passed: 4 profiles, opportunity weighting, HI, RP, save/restore.');
