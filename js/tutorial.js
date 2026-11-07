@@ -3,15 +3,17 @@
  'use strict';
  const $=id=>document.getElementById(id);
  const steps=[
-  {title:'スタート地点を選択',text:'マップの「外縁ゲート」をタップしてください。四角いアイコンが病院システムを表す架空のノードです。',event:'select',key:'gate',target:'[data-node="gate"]'},
-  {title:'仮想データを回収',text:'右側の「模擬データ回収」を押してみましょう。IPが増え、1 AP（行動力）を使います。',event:'collect',key:'gate',target:'#nodeAction'},
-  {title:'次のノードを選択',text:'マップ上の青い「事務情報」ノードを選択します。接続されたノードから行動範囲を広げていきます。',event:'select',key:'office',target:'[data-node="office"]'},
-  {title:'ノードへ進出',text:'右側の「ノードへ進出」を押してください。練習のため今回だけ確実に成功します。通常プレイではゲーム内の確率で判定されます。',event:'expand',key:'office',target:'#nodeAction'},
-  {title:'進化研究所を開く',text:'上部の「進化・強化」を押しましょう。獲得したIPで能力を育てることができます。',event:'panel',key:'upgrade',target:'#openUpgradeBtn'},
-  {title:'解析をLv.1にする',text:'「解析」の購入ボタンを押して、模擬データの回収効率を強化しましょう。購入後はパネルが閉じます。',event:'upgrade',key:'analysis',target:'[data-upgrade="analysis"]'},
-  {title:'戦術ショップを開く',text:'続いて「戦術ショップ」を開きます。今回は練習用のIPがあるため、追加アクションを購入できます。',event:'panel',key:'shop',target:'#openShopBtn'},
-  {title:'追加アクションを購入',text:'「追加アクション」を選んで +1 AP を得ましょう。通常は24 IP必要で、1ターンに1回だけ購入できます。',event:'boost',key:'boost',target:'[data-shop="boost"]'},
-  {title:'ターンを終了',text:'「ターン終了」を押しましょう。病院側も経路の分離や復旧などの防御行動を行います。',event:'turn',key:'turn',target:'#endTurnBtn'}
+  {title:'スタート地点を選択',text:'マップの「外縁ゲート」をタップ。ノードは架空の病院システムを表します。',event:'select',key:'gate',target:'[data-node="gate"]'},
+  {title:'模擬データを回収',text:'「模擬データ回収」を押します。IPが増え、行動力を1 AP消費します。',event:'collect',key:'gate',target:'#nodeAction'},
+  {title:'次のノードを選択',text:'マップの「事務情報」をタップし、次の対象を選びます。',event:'select',key:'office',target:'[data-node="office"]'},
+  {title:'ノードに進出',text:'「ノードへ進出」を押してください。練習の最初の進出のみ成功保証です。',event:'expand',key:'office',target:'#nodeAction'},
+  {title:'行動力を使い切る',text:'「事務情報」で模擬データを回収。これで初期の3 APを使い切ります。',event:'collect',key:'office',target:'#nodeAction'},
+  {title:'進化研究所を開く',text:'上部の「進化・強化」を押します。',event:'panel',key:'upgrade',target:'#openUpgradeBtn'},
+  {title:'解析Lv.1を購入',text:'「解析」を強化すると、回収1回あたりのIPが増えます。',event:'upgrade',key:'analysis',target:'[data-upgrade="analysis"]'},
+  {title:'戦術ショップを開く',text:'今は0 APのため、通常は追加回収できません。「戦術ショップ」を開きましょう。',event:'panel',key:'shop',target:'#openShopBtn'},
+  {title:'追加APを購入',text:'24 IPで追加アクションを購入し、0 APから1 APに補充します。',event:'boost',key:'boost',target:'[data-shop="boost"]'},
+  {title:'購入したAPを使う',text:'「事務情報」で、追加された1 APを使ってもう一度回収しましょう。',event:'collect',key:'office',target:'#nodeAction'},
+  {title:'ターンを終了',text:'APを使い切りました。「ターン終了」で病院側の防御イベントが進みます。',event:'turn',key:'turn',target:'#endTurnBtn'}
  ];
  let active=false,finished=false,paused=false,stepIndex=0;
  const guide=$('tutorialGuide'),progress=$('tutorialProgress'),progressBar=$('tutorialProgressBar'),
@@ -30,17 +32,32 @@
   status.textContent='強調表示された場所を操作';
   skip.textContent='チュートリアル終了';
   const target=document.querySelector(step.target);
-  guide.dataset.placement='bottom';
-  if(target){
-   // Move the coach card away from a highlighted node on a small landscape screen.
-   const bounds=target.getBoundingClientRect();
-   const landscape=window.matchMedia('(orientation: landscape) and (max-height: 600px) and (max-width: 1100px) and (pointer: coarse)').matches;
-   if(landscape&&bounds.left<window.innerWidth*.54&&(bounds.top+bounds.height/2)>window.innerHeight*.52)guide.dataset.placement='top';
-   target.classList.add('tutorial-spotlight');
-   if(target.matches('#nodeAction,[data-upgrade],[data-shop],#endTurnBtn')){
-    target.scrollIntoView({block:'nearest',inline:'nearest',behavior:'auto'});
-   }
+  guide.dataset.placement='bottom-left';
+  if(!target){
+   status.textContent='操作対象が表示されません。画面の拡大・パネルを確認';
+   return;
   }
+  target.classList.add('tutorial-spotlight');
+  // All steps (including SVG nodes and toolbar commands) must scroll into view.
+  if(typeof target.scrollIntoView==='function'){
+   target.scrollIntoView({block:target.matches('[data-node]')?'center':'nearest',inline:'nearest',behavior:'instant'});
+  }
+  const rect=target.getBoundingClientRect();
+  const width=Math.min(guide.offsetWidth||350,window.innerWidth-20);
+  const height=Math.min(guide.offsetHeight||150,window.innerHeight-20);
+  const margin=10;
+  const corners=[
+    {name:'bottom-left',x:margin,y:window.innerHeight-height-margin},
+    {name:'top-left',x:margin,y:margin},
+    {name:'bottom-right',x:window.innerWidth-width-margin,y:window.innerHeight-height-margin},
+    {name:'top-right',x:window.innerWidth-width-margin,y:margin}
+  ];
+  const overlap=c=>Math.max(0,Math.min(c.x+width,rect.right)-Math.max(c.x,rect.left))*
+                   Math.max(0,Math.min(c.y+height,rect.bottom)-Math.max(c.y,rect.top));
+  corners.sort((a,b)=>overlap(a)-overlap(b));
+  guide.dataset.placement=corners[0].name;
+  // Focus the live target to support keyboard navigation without triggering it.
+  if(typeof target.focus==='function')target.focus({preventScroll:true});
  }
  function start(){
   stepIndex=0;active=true;finished=false;paused=false;
@@ -57,9 +74,7 @@
   if(!active)return false;
   const step=steps[stepIndex];
   if(event===step.event&&key===step.key)return true;
-  // Selecting the currently guided node again or reopening the relevant drawer is harmless.
-  if(event==='select'&&step.event==='collect'&&key==='gate')return true;
-  if(event==='select'&&step.event==='expand'&&key==='office')return true;
+  if(event==='select'&&(step.event==='collect'||step.event==='expand')&&key===step.key)return true;
   if(event==='panel'&&step.event==='upgrade'&&key==='upgrade')return true;
   if(event==='panel'&&step.event==='boost'&&key==='shop')return true;
   return false;
@@ -77,7 +92,7 @@
    progress.textContent='COMPLETE';
    progressBar.style.width='100%';
    title.textContent='チュートリアル完了！';
-   description.textContent='基本操作を覚えました。病院側の防御イベントと警戒度を確認しながら、引き続きプレイできます。実際の医療情報システムは使用していません。';
+    description.textContent='基本操作を完了しました。通常操作として続行できますが、この練習から開始した攻略では最後までRP・実績は保存されません。RP獲得には通常ゲームから開始してください。';
    status.textContent='練習用の進行状況を引き継ぎます';
    skip.textContent='ゲームを続ける';
    return;

@@ -51,3 +51,15 @@
 @media(orientation:landscape) and (max-height:600px) and (max-width:1100px) and (pointer:coarse){
  .tutorial-guide[data-placement="top"]{top:calc(6px + env(safe-area-inset-top));bottom:auto}
 }
+
+/* v0.7.2: keep the coach card separate from highlighted targets on all screens. */
+.tutorial-guide[data-placement="top-left"]{top:12px;bottom:auto;left:12px;right:auto}
+.tutorial-guide[data-placement="bottom-left"]{bottom:12px;top:auto;left:12px;right:auto}
+.tutorial-guide[data-placement="top-right"]{top:12px;bottom:auto;right:12px;left:auto}
+.tutorial-guide[data-placement="bottom-right"]{bottom:12px;top:auto;right:12px;left:auto}
+@media (orientation:landscape) and (max-height:600px) and (max-width:1100px) and (pointer:coarse){
+  .tutorial-guide[data-placement="top-left"]{top:calc(6px + env(safe-area-inset-top));bottom:auto;left:6px;right:auto}
+  .tutorial-guide[data-placement="bottom-left"]{bottom:calc(6px + env(safe-area-inset-bottom));top:auto;left:6px;right:auto}
+  .tutorial-guide[data-placement="top-right"]{top:calc(6px + env(safe-area-inset-top));bottom:auto;right:6px;left:auto}
+  .tutorial-guide[data-placement="bottom-right"]{bottom:calc(6px + env(safe-area-inset-bottom));top:auto;right:6px;left:auto}
+}

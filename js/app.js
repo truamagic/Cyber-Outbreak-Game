@@ -11,8 +11,8 @@ let state=null,hasBegun=false;let awardFilter='all',lastToastKey='',toastTimer=n
 let earned=readEarned();
 function readEarned(){try{const value=JSON.parse(localStorage.getItem(STORAGE_KEY)||'[]');return new Set(Array.isArray(value)?value.filter(v=>ALL_AWARDS.some(a=>a.id===v)):[])}catch(_){return new Set()}}
 function persistEarned(){try{localStorage.setItem(STORAGE_KEY,JSON.stringify([...earned]))}catch(_){/* local data may be disabled */}}
-function earn(id){if(state?.wasTutorial||state?.tutorial||!ALL_AWARDS.some(a=>a.id===id)||earned.has(id))return;earned.add(id);persistEarned();const a=ALL_AWARDS.find(a=>a.id===id);log('実績解除：「'+a.name+'」','positive');addRP(5)}
-function addRP(amount){if(amount<=0)return;meta.rp=Math.min(100000,meta.rp+amount);if(state)state.rpEarned=(state.rpEarned||0)+amount;PROG.saveMeta(meta)}
+function earn(id){if(state?.wasTutorial||state?.tutorial||!ALL_AWARDS.some(a=>a.id===id)||earned.has(id))return;earned.add(id);persistEarned();const a=ALL_AWARDS.find(a=>a.id===id);log('実績解除：「'+a.name+'」','positive');addRP(5,'achievements')}
+function addRP(amount,category='achievements'){if(amount<=0)return;meta.rp=Math.min(100000,meta.rp+amount);if(state){state.rpEarned=(state.rpEarned||0)+amount;if(state.rpBreakdown&&Object.hasOwn(state.rpBreakdown,category))state.rpBreakdown[category]+=amount}PROG.saveMeta(meta)}
 function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
 function makeState(difficulty='normal',profileId='B'){
  const chosenProfile=PROG.PROFILES[profileId]?profileId:'B';
@@ -22,7 +22,7 @@ function makeState(difficulty='normal',profileId='B'){
  nodes:MAP.map(n=>({...n,left:n.data,owned:n.id==='gate',bonusSecurity:0,lockedUntil:0,unitTurns:0,demanded:false,harvestOnce:false,artifact:artifactsOnNodes[n.id]||null})),
  edges:EDGES.map(([a,b])=>({a,b,blockedUntil:0})),log:[],ended:false,started:true,demandAttempts:0,unitsEarned:0,shopBoostedTurn:0,
  profileId:chosenProfile,maturity:PROG.initialMaturity(chosenProfile),opportunity:null,opportunitiesSeen:0,opportunitiesUsed:0,opportunityBonus:0,
- impact:{info:0,systems:0,financial:0,care:0},rpEarned:0,wasTutorial:false,forecastLevel:meta.levels.forecast}
+ impact:{info:0,systems:0,financial:0,care:0},rpEarned:0,rpBreakdown:{achievements:0,clear:0,firstClear:0,profile:0,loss:0},defenseHistory:{isolations:0,blockedIncomeTurns:0,blockedIncomeIP:0,recoveredNodes:0,removedUnits:0},wasTutorial:false,forecastLevel:meta.levels.forecast}
 }
 function node(id){return state.nodes.find(n=>n.id===id)}
 function edge(a,b){return state.edges.find(e=>(e.a===a&&e.b===b)||(e.a===b&&e.b===a))}
@@ -84,8 +84,9 @@ function render(){if(!state)return;
  setText('goalIPText',state.total+' / '+state.rule.targetIP+' IP');setText('goalNodeText',activeCount()+' / '+state.rule.targetNodes);setText('alertText',state.alert+' / 100');
  $('goalIPBar').style.width=Math.min(100,state.total/state.rule.targetIP*100)+'%';$('goalNodeBar').style.width=Math.min(100,activeCount()/state.rule.targetNodes*100)+'%';$('alertBar').style.width=state.alert+'%';
  setText('alertMessage',state.alert>=80?'病院側が重点対応中。継続収入が停止される可能性も高まっています。':state.alert>=55?'警戒度上昇。ネットワーク分離・復旧に注意。':state.alert>=25?'病院側が兆候を検知し、経路遮断や防御強化を検討しています。':'病院側は通常監視中。警戒度100で終了します。');
- $('statusChips').innerHTML=`<span class="status-chip">遮断経路 ${state.edges.filter(e=>e.blockedUntil>=state.turn).length}</span><span class="status-chip">継続ユニット ${totalUnits()}/2</span><span class="status-chip">回収 ${state.harvested} IP</span><span class="status-chip">継続収入 ${state.passive} IP</span><span class="status-chip ${state.demandAttempts?'alert':''}">要求イベント ${state.demandIncome} IP</span>`;
+ $('statusChips').innerHTML=`<span class="status-chip">遮断経路 ${state.edges.filter(e=>e.blockedUntil>=state.turn).length}</span><span class="status-chip">継続ユニット ${totalUnits()}/2</span><span class="status-chip">回収 ${state.harvested} IP</span><span class="status-chip">継続収入 ${state.passive} IP</span><span class="status-chip ${state.demandAttempts?'alert':''}">要求イベント ${state.demandIncome} IP</span><span class="status-chip">好機 ${state.opportunityBonus} IP</span>`;
  setText('mapStatus',state.ended?'SIMULATION COMPLETE':'ROUND '+String(state.turn).padStart(2,'0')+' / AP '+state.ap);
+ setText('missionBrief','勝利条件：累計'+state.rule.targetIP+' IP＋接続'+state.rule.targetNodes+'ノード／'+state.rule.maxTurns+'ターン以内・警戒100で終了');
  updateHUD();
  renderMap();renderDetail();renderUpgrades();renderShop();renderFeed();renderAwards();renderMaturity();renderImpact();renderOpportunity();renderResearch();$('endTurnBtn').disabled=state.ended||!tutorialAllows('turn','turn');
  $('openShopBtn').disabled=state.ended||!tutorialAllows('panel','shop');
@@ -165,6 +166,7 @@ function renderDetail(){const n=node(state.selected),active=isActive(n),disconne
  const desc=visible(n)?n.desc:'まだ探索できないノードです。接続経路があるノードから探索を進めてください。';
  const defense=visible(n)?n.security+n.bonusSecurity:0;
  const data=visible(n)?n.left+' IP':'不明';
+ const estimate=!n.owned&&reachable(n)?`推定進出成功率：${expansionChance(n)}%（ゲーム用確率、練習の初回進出のみ成功保証）`:'1 APでの回収見込み：'+Math.min(n.left,11+state.up.analysis*5)+' IP';
  const canCollect=n.owned&&active&&n.left>0&&state.ap>0&&!state.ended&&tutorialAllows('collect',n.id);
  const canExpand=!n.owned&&reachable(n)&&n.lockedUntil<state.turn&&state.ap>0&&!state.ended&&tutorialAllows('expand',n.id);
  const canInstall=n.owned&&active&&n.server&&n.unitTurns===0&&totalUnits()<2&&state.points>=16&&state.ap>0&&!state.ended;
@@ -175,11 +177,11 @@ function renderDetail(){const n=node(state.selected),active=isActive(n),disconne
  <p class="description">${desc}</p>
  <div class="kv"><div class="kv-item"><small>DEFENSE / 防御強度</small><div class="defense-pips" aria-label="防御強度 ${defense} / 5">${gems}</div></div><div class="kv-item"><small>SIMULATED DATA / 残量</small><strong>${data}</strong></div></div>
  <div class="detail-note">${disconnected?'病院側が経路を分離中。接続が戻るまで行動・継続収入が停止します。':n.owned&&n.unitTurns>0?'継続収入ユニット設置中。残り '+n.unitTurns+' ターン。':n.owned?'模擬データを回収するか、継続収入・要求イベントを選択できます。':'進出は抽象的な成功・失敗判定で処理します。'}</div>
- <div class="action-stack"><button class="primary" id="nodeAction" type="button" ${canCollect||canExpand?'':'disabled'}>${primary}</button>
+ <p class="action-estimate">${estimate}</p><div class="action-stack"><button class="primary" id="nodeAction" type="button" ${canCollect||canExpand?'':'disabled'}>${primary}</button>
  <button class="secondary amber-button" id="nodeShopBtn" type="button" ${tutorialAllows("panel","shop")?"":"disabled"}>◈ このノードの戦術ショップを開く ↗</button><div class="action-sub">継続収入ユニット、要求イベント、追加行動力はショップから選択します。</div></div>`;
  $('nodeAction').addEventListener('click',()=>n.owned?collect(n.id):expand(n.id));$('nodeShopBtn').addEventListener('click',()=>openPanel('shop'));
 }
-function renderUpgrades(){$('upgrades').innerHTML=Object.entries(UPGRADES).map(([key,u])=>{const lv=state.up[key],cost=u.costs[lv],ticks=Array.from({length:3},(_,i)=>'<span class="'+(lv>i?'on':'')+'"></span>').join('');return `<div class="upgrade-item"><div class="upgrade-icon" aria-hidden="true">${u.icon}</div><div><div class="upgrade-name">${u.label} <span class="level">LV ${lv} / 3</span></div><div class="upgrade-description">${u.desc}</div><div class="upgrade-ticks">${ticks}</div></div><button class="upgrade-button" data-upgrade="${key}" ${lv>=3||state.points<cost||state.ended||!tutorialAllows('upgrade',key)?'disabled':''}>${lv>=3?'MAX':cost+' IP'}</button></div>`}).join('');$('upgrades').querySelectorAll('[data-upgrade]').forEach(b=>b.addEventListener('click',()=>buy(b.dataset.upgrade)))}
+function renderUpgrades(){$('upgrades').innerHTML=Object.entries(UPGRADES).map(([key,u])=>{const lv=state.up[key],cost=u.costs[lv],ticks=Array.from({length:3},(_,i)=>'<span class="'+(lv>i?'on':'')+'"></span>').join('');return `<div class="upgrade-item"><div class="upgrade-icon" aria-hidden="true">${u.icon}</div><div><div class="upgrade-name">${u.label} <span class="level">LV ${lv} / 3</span></div><div class="upgrade-description">${u.desc}</div><div class="upgrade-ticks">${ticks}</div></div><button class="upgrade-button" data-upgrade="${key}" aria-label="${u.label} ${lv>=3?'最大レベル到達':'をLv.'+(lv+1)+'に強化、'+cost+' IP'}" ${lv>=3||state.points<cost||state.ended||!tutorialAllows('upgrade',key)?'disabled':''}>${lv>=3?'MAX':cost+' IP'}</button></div>`}).join('');$('upgrades').querySelectorAll('[data-upgrade]').forEach(b=>b.addEventListener('click',()=>buy(b.dataset.upgrade)))}
 
 function renderShop(){
  const n=node(state.selected),active=isActive(n);
@@ -189,7 +191,7 @@ function renderShop(){
  setText('shopNodeName',visible(n)?n.name:'未発見');
  setText('shopIpBalance',activePanel==='research'?meta.rp+' RP':state.points+' IP');
  const list=[
-  {key:'generator',icon:'◷',name:'継続収入ユニット',price:'16 IP / 1 AP',desc:'選択サーバーノードから3ターン収入。病院側の経路分離・復旧で停止します。',ok:generator,hint:n.server?'サーバー限定・最大2台':'サーバーノードを選択してください'},
+  {key:'generator',icon:'◷',name:'継続収入ユニット',price:'16 IP / 1 AP',desc:'設置費16 IP・1 AP。接続中は毎ターン10 IP（継続Lvごとに+4）、最大3回。分離中は入金なし。',ok:generator,hint:n.server?'サーバー限定・最大2台':'サーバーノードを選択してください'},
   {key:'boost',icon:'✦',name:'追加アクション',price:'24 IP',desc:'今のターンの行動力を1 AP追加します。購入は各ターン1回まで。',ok:boost,hint:state.shopBoostedTurn===state.turn?'このターンは購入済み':'ターン内の選択肢を増やせます'},
   {key:'request',icon:'◇',name:'要求イベント',price:'1 AP',desc:'模擬データを10 IP以上回収した接続中ノードで抽象的な要求イベントを選択。警戒度が上昇。',ok:request,hint:n.demanded?'このノードでは実行済み':'成功・失敗はゲーム内の確率判定'}
  ];
@@ -311,9 +313,9 @@ function collect(id){if(!state||state.ended||state.ap<1||!tutorialAllows('collec
  const amount=Math.min(n.left,11+state.up.analysis*5);n.left-=amount;state.points+=amount;state.total+=amount;state.harvested+=amount;state.ap--;applyAlert(2);impactChange('info',Math.ceil(amount/4));impactChange('financial',1);log(n.name+'から模擬データ '+amount+' IPを回収。','positive');
  if(!n.harvestOnce){n.harvestOnce=true;if(n.artifact){const art=ARTIFACTS.find(a=>a.id===n.artifact);earn(art.id);log('隠し記録を発見：「'+art.name+'」','positive')}}
  if(state.harvested>=50)earn('wealth');check();render();tutorialSignal('collect',id)}
+function expansionChance(n){const adj=Math.round((50-state.maturity.maintenance)*.10);return Math.min(96,Math.max(35,91-8*(n.security+n.bonusSecurity)+state.up.spread*10+adj-Math.floor(state.alert/29)*2-(state.difficulty==='hard'?6:0)))}
 function expand(id){if(!state||state.ended||state.ap<1||!tutorialAllows('expand',id))return;const n=node(id);if(!n||n.owned||!reachable(n)||n.lockedUntil>=state.turn)return;
- const maturityAdjustment=Math.round((50-state.maturity.maintenance)*.10);
- const chance=Math.min(96,Math.max(35,91-8*(n.security+n.bonusSecurity)+state.up.spread*10+maturityAdjustment-Math.floor(state.alert/29)*2-(state.difficulty==='hard'?6:0)));
+ const chance=expansionChance(n);
  state.ap--;if((state.tutorial&&id==='office')||Math.random()*100<chance){n.owned=true;applyAlert(3);impactChange('systems',5);impactChange('care',n.id==='records'||n.id==='lab'||n.id==='image'?4:2);log(n.name+'に影響が拡大しました（架空判定）。','positive');earn('first')}else{applyAlert(5);log(n.name+'への進出が失敗。病院側の防御が機能しました。','negative')}
  check();render();if(n.owned)tutorialSignal('expand',id)}
 function install(id){if(!state||state.ended||state.ap<1||!tutorialAllows('install',id))return;const n=node(id);if(!n||!isActive(n)||!n.server||n.unitTurns||totalUnits()>=2||state.points<16)return;
@@ -337,26 +339,66 @@ function hospitalTurn(){const t=state.turn;const variant=t%4;
 function isolateRandom(){const options=state.edges.filter(e=>e.blockedUntil<state.turn&&((node(e.a).owned&&node(e.b).owned)||(node(e.a).owned&&!node(e.b).owned)||(node(e.b).owned&&!node(e.a).owned)));
  if(!options.length){fortify();return}
  const owned=options.filter(e=>node(e.a).owned&&node(e.b).owned);const pool=owned.length&&Math.random()<.65?owned:options;const e=pool[Math.floor(Math.random()*pool.length)];
- e.blockedUntil=state.turn+1+(Math.random()<.4?1:0);log('病院側：'+node(e.a).name+' ⇄ '+node(e.b).name+'の接続を分離（経路遮断）。','negative')}
+ e.blockedUntil=state.turn+1+(Math.random()<.4?1:0);state.defenseHistory.isolations++;log('病院側：'+node(e.a).name+' ⇄ '+node(e.b).name+'の接続を分離（経路遮断）。','negative')}
 function fortify(){const options=state.nodes.filter(n=>!n.owned&&visible(n));if(!options.length){applyAlert(4);log('病院側：資産点検と防御の見直しを実施。','negative');return}
  const n=options[Math.floor(Math.random()*options.length)];n.bonusSecurity=Math.min(2,n.bonusSecurity+1);log('病院側：'+n.name+'の防御を強化。','negative')}
 function recover(){const occupied=state.nodes.filter(n=>n.owned&&n.id!=='gate');const unitNodes=occupied.filter(n=>n.unitTurns>0);const choices=unitNodes.length&&Math.random()<.65?unitNodes:occupied;
- if(choices.length&&state.alert>=45&&Math.random()<(.30+state.maturity.recovery*.002)){const n=choices[Math.floor(Math.random()*choices.length)];n.owned=false;n.unitTurns=0;n.lockedUntil=state.turn+1;impactChange('systems',-8);impactChange('care',-5);log('病院側：'+n.name+'を復旧し、継続収入があれば停止。','negative')}else{applyAlert(4);log('病院側：復旧手順と連絡体制を再確認。','negative')}
+ if(choices.length&&state.alert>=45&&Math.random()<(.30+state.maturity.recovery*.002)){const n=choices[Math.floor(Math.random()*choices.length)];n.owned=false;state.defenseHistory.recoveredNodes++;if(n.unitTurns>0)state.defenseHistory.removedUnits++;n.unitTurns=0;n.lockedUntil=state.turn+1;impactChange('systems',-8);impactChange('care',-5);log('病院側：'+n.name+'を復旧し、継続収入があれば停止。','negative')}else{applyAlert(4);log('病院側：復旧手順と連絡体制を再確認。','negative')}
 }
 function payGenerators(){for(const n of state.nodes){if(n.unitTurns<=0)continue;
  if(isActive(n)){const amount=10+4*state.up.sustain;state.points+=amount;state.total+=amount;state.passive+=amount;state.unitsEarned+=amount;impactChange('systems',1);impactChange('financial',1);n.unitTurns--;log('継続収入：'+n.name+'から '+amount+' IP。残り '+n.unitTurns+' ターン。','positive');earn('stream');if(n.unitTurns===0)log(n.name+'の継続収入ユニットは期限終了。','info')}
- else{log('継続収入：'+n.name+'は経路分離中のため停止。','negative')}
+ else{state.defenseHistory.blockedIncomeTurns++;state.defenseHistory.blockedIncomeIP+=10+4*state.up.sustain;log('継続収入：'+n.name+'は経路分離中のため停止（このターンの予定収入なし）。','negative')}
 }}
 function restoreRoutes(){for(const e of state.edges){if(e.blockedUntil===state.turn-1){log('病院側：'+node(e.a).name+' ⇄ '+node(e.b).name+'の接続を復旧。','info');earn('reconnect')}}}
 function endTurn(){if(!state||state.ended||!tutorialAllows('turn','turn'))return;hospitalTurn();if(state.alert>=100){end(false,'病院側の封じ込めが完了しました。');return}
  if(state.turn>=state.rule.maxTurns){end(false,'制限ターンに達しました。');return}
  state.turn++;state.ap=3;restoreRoutes();payGenerators();advanceOpportunity();log('新しいターンが始まりました。','info');rollOpportunity();check();render();tutorialSignal('turn','turn');}
 function check(){if(!state||state.ended)return;if(state.total>=state.rule.targetIP&&activeCount()>=state.rule.targetNodes)end(true,'仮想情報ポイントと接続中のノード目標を達成しました。');else if(state.alert>=100)end(false,'病院側の封じ込めが完了しました。')}
-function end(won,reason){if(state.ended)return;closePanel(false);window.CyberOutbreakTutorial?.reset?.();state.ended=true;
- if(!state.wasTutorial){if(won)earn('victory');const first=won&&!meta.firstClears[state.profileId];const reward=PROG.runReward(won,state.turn,state.harvested,state.profileId,first);if(reward>0){meta.runs++;if(won)meta.firstClears[state.profileId]=true;addRP(reward);log('攻略結果：'+reward+' RPを獲得。','positive')}if(won&&state.profileId==='A')earn('secureClear')}
- render();setText('resultIcon',won?'★':'⬡');setText('resultLabel',won?'MISSION COMPLETE':'MISSION ENDED');setText('resultTitle',won?'ミッション達成！':'病院側の防御成功');setText('resultLead',reason+(won?' 次は隠し記録の収集や別の戦略に挑戦できます。':' 行動順序と投資先を調整して再挑戦できます。'));
- setText('resultData',state.total);setText('resultNodes',activeCount());setText('resultTurns',state.turn);setText('resultRP',state.rpEarned+' RP');setText('resultHI',PROG.impactIndex(state.impact)+' / 100');setText('resultCare',PROG.careContinuity(state.impact)+'%');setText('resultLoss',state.impact.financial*20+'万円');
- setText('debriefText','病院側のネットワーク分離は接続関係を断ち、継続収入を停止させました。復旧は影響ノードの状態を戻します。情報管理・監視・BCPを組み合わせた対策が重要です。本ゲームは現実のリスクを数値化したものではありません。');$('result').hidden=false;
+function debriefSummary(){
+ const d=state.defenseHistory,notes=[];
+ if(!d.isolations)notes.push('今回、ネットワーク分離は記録されませんでした。');
+ else if(!d.blockedIncomeTurns)notes.push('ネットワーク分離は'+d.isolations+'回発生しましたが、継続収入の停止は記録されませんでした。');
+ else notes.push('ネットワーク分離は'+d.isolations+'回、継続収入停止は'+d.blockedIncomeTurns+'回ありました（そのターンに予定されていた'+d.blockedIncomeIP+' IPが発生せず）。');
+ if(d.recoveredNodes)notes.push('ノード復旧は'+d.recoveredNodes+'件'+(d.removedUnits?'、うち継続設備の撤去'+d.removedUnits+'件':'')+'でした。');
+ else notes.push('この試行ではノード復旧を確認していません。');
+ notes.push('継続収入の実獲得は'+state.passive+' IPです。すべてゲーム内の架空の結果です。');
+ return notes.join(' ');
+}
+function end(won,reason){
+ if(state.ended)return;closePanel(false);window.CyberOutbreakTutorial?.reset?.();state.ended=true;
+ if(!state.wasTutorial){
+  if(won)earn('victory');
+  const first=won&&!meta.firstClears[state.profileId];
+  if(state.turn>=3&&state.harvested>=12){
+   meta.runs++;
+   if(won){
+    addRP(15,'clear');
+    if(first)addRP(10,'firstClear');
+    addRP(PROG.PROFILES[state.profileId].bonusRP,'profile');
+    meta.firstClears[state.profileId]=true;
+    log('攻略報酬を獲得。内訳は結果画面を参照。','positive');
+   }else{addRP(3,'loss');log('攻略報酬：失敗分3 RPを獲得。','positive')}
+  }
+  if(won&&state.profileId==='A')earn('secureClear');
+ }
+ render();
+ setText('resultIcon',won?'★':'⬡');setText('resultLabel',won?'MISSION COMPLETE':'MISSION ENDED');
+ setText('resultTitle',won?'ミッション達成！':'病院側の防御成功');
+ setText('resultLead',reason+(won?' 次の挑戦条件を選べます。':' 行動順序と投資先を調整して再挑戦できます。'));
+ setText('resultData',state.total);setText('resultNodes',activeCount());setText('resultTurns',state.turn);
+ setText('resultRP',state.rpEarned+' RP');setText('resultHI',PROG.impactIndex(state.impact)+' / 100');
+ setText('resultCare',PROG.careContinuity(state.impact)+'%');setText('resultLoss',state.impact.financial*20+'万円');
+ const total=state.harvested+state.passive+state.demandIncome+state.opportunityBonus;
+ setText('resultIPDetails','通常回収 '+state.harvested+' ＋ 継続収入 '+state.passive+' ＋ 要求 '+state.demandIncome+' ＋ 好機 '+state.opportunityBonus+' ＝ '+total+' IP');
+ const r=state.rpBreakdown;
+ setText('resultRPDetails','実績 '+r.achievements+' ＋ 成功 '+r.clear+' ＋ 初回 '+r.firstClear+' ＋ 病院 '+r.profile+' ＋ 失敗 '+r.loss+' ＝ '+state.rpEarned+' RP');
+ setText('debriefText',debriefSummary());
+ const tutorial=state.wasTutorial;
+ setText('resultSettings',(tutorial?'練習開始':'通常開始')+'／'+(tutorial?'カジュアル':state.difficulty)+'／'+PROG.PROFILES[state.profileId].label+'／目標'+state.rule.targetIP+' IP・'+state.rule.targetNodes+'ノード・期限'+state.rule.maxTurns+'ターン');
+ setText('againBtn',tutorial?'練習を最初からやり直す':'同設定でもう一度プレイ');
+ if(tutorial)setText('resultRewardNote','この攻略は練習から始まったため、続行後もRP・実績保存の対象外です。');
+ else setText('resultRewardNote','RPは攻略報酬と初回実績報酬の合計です。');
+ $('result').hidden=false;window.CyberOutbreakDialogs?.show?.('result');
 }
 function selectNode(id){if(!state||!node(id)||!tutorialAllows('select',id))return;state.selected=id;renderMap();renderDetail();renderShop();tutorialSignal('select',id)}
 function startGame(){window.CyberOutbreakTutorial?.reset?.();closePanel(false);const d=$('difficulty').value;hasBegun=true;state=makeState(d,$('hospitalProfile').value);log(PROG.PROFILES[state.profileId].label+'の架空シミュレーションを開始しました。');log('経路遮断・継続収入・要求イベントと隠し記録を利用できます。');$('intro').hidden=true;$('result').hidden=true;render()}
@@ -371,7 +413,9 @@ function startTutorialGame(){
  render();window.CyberOutbreakTutorial?.start?.();
 }
 function leaveTutorial(){if(!state?.tutorial)return;state.tutorial=false;log('チュートリアルを終了。ここから通常のゲームルールで続行できます。');render()}
-function showHelp(){window.CyberOutbreakTutorial?.pause?.();closePanel(false);$('intro').hidden=false;$('continueBtn').hidden=!(hasBegun&&state&&!state.ended);$('startBtn').textContent=hasBegun&&!state.ended?'新しいゲームを開始 →':'ゲーム開始 →'}
+function replaySameSettings(){if(!state)return;const practiced=state.wasTutorial;const d=state.difficulty,profile=state.profileId;if(practiced){startTutorialGame();return}$('difficulty').value=d;$('hospitalProfile').value=profile;startGame()}
+function resultToMenu(){$('result').hidden=true;showHelp()}
+function showHelp(){window.CyberOutbreakTutorial?.pause?.();closePanel(false);$('result').hidden=true;$('intro').hidden=false;$('continueBtn').hidden=!(hasBegun&&state&&!state.ended);$('startBtn').textContent=hasBegun&&!state.ended?'新しいゲームを開始 →':'ゲーム開始 →';window.CyberOutbreakDialogs?.show?.('intro')}
 
 document.querySelectorAll('[data-panel]').forEach(b=>b.addEventListener('click',()=>openPanel(b.dataset.panel)));
 $('closeDrawerBtn').addEventListener('click',()=>closePanel());
@@ -386,7 +430,7 @@ $('importMetaFile').addEventListener('change',e=>{importMetaFile(e.target.files?
 $('network').addEventListener('click',e=>{const g=e.target.closest('[data-node]');if(g)selectNode(g.dataset.node)});
 $('network').addEventListener('keydown',e=>{if((e.key==='Enter'||e.key===' ')&&e.target.closest('[data-node]')){e.preventDefault();selectNode(e.target.closest('[data-node]').dataset.node)}});
 $('startBtn').addEventListener('click',startGame);$('tutorialStartBtn').addEventListener('click',startTutorialGame);$('continueBtn').addEventListener('click',()=>{$('intro').hidden=true;window.CyberOutbreakTutorial?.resume?.()});$('endTurnBtn').addEventListener('click',endTurn);
-$('againBtn').addEventListener('click',startGame);$('restartBtn').addEventListener('click',()=>{if(state&&!state.ended&&!confirm('現在のゲームを最初からやり直しますか？'))return;showHelp()});$('helpBtn').addEventListener('click',showHelp);$('guideBtn').addEventListener('click',showHelp);
+$('againBtn').addEventListener('click',replaySameSettings);$('resultMenuBtn').addEventListener('click',resultToMenu);$('restartBtn').addEventListener('click',()=>{if(state&&!state.ended&&!confirm('現在のゲームを最初からやり直しますか？'))return;showHelp()});$('helpBtn').addEventListener('click',showHelp);$('guideBtn').addEventListener('click',showHelp);
 $('fitMapBtn').addEventListener('click',()=>{const vp=$('mapViewport');const isFit=vp.classList.toggle('fit-map');$('fitMapBtn').setAttribute('aria-pressed',String(isFit));$('fitMapBtn').textContent=isFit?'拡大して見る ↗':'全体表示 ↗';});
  document.querySelectorAll('[data-award-filter]').forEach(btn=>btn.addEventListener('click',()=>{awardFilter=btn.dataset.awardFilter;document.querySelectorAll('[data-award-filter]').forEach(b=>b.setAttribute('aria-pressed',String(b===btn)));renderAwards()}));
  $('clearAwardsBtn').addEventListener('click',()=>{if(!confirm('このブラウザの実績記録をリセットしますか？'))return;earned=new Set();persistEarned();renderAwards()});

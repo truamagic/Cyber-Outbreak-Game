@@ -1,0 +1,32 @@
+/* CYBER OUTBREAK v0.7.2 - review corrections */
+.mission-brief{border:1px solid #336079;border-radius:10px;background:#12283c;color:#c5eced;padding:9px 14px;font-size:12px;font-weight:750;margin:0 0 12px;line-height:1.5}
+.intro-short{margin-bottom:8px!important}
+.intro-caution{border-left:3px solid #73dac7;border-radius:6px;padding:8px 11px;background:#163748;color:#ecfff9!important;font-size:12px!important;line-height:1.5!important;margin:9px 0!important}
+.intro-caution strong{display:block;color:#9cf4e3;margin-bottom:3px}
+.intro-rule{font-size:12px!important;color:#bde6f0!important;line-height:1.5!important;margin:8px 0!important}
+.intro-details{border:1px solid #355c74;border-radius:9px;background:#11283b;margin:8px 0 10px;padding:9px 11px}
+.intro-details summary{cursor:pointer;color:#b4efdf;font-size:12px;font-weight:800}
+.intro-details ul{margin:8px 0 0;padding-left:20px;color:#bfd3e1}
+.modal-close-btn{position:absolute;top:12px;right:14px;width:39px;height:39px;border:1px solid #518595;border-radius:9px;background:#1e4759;color:#e5ffff;font-size:21px;z-index:2}
+.modal-close-btn[hidden]{display:none!important}
+.result-breakdown{padding:12px;margin:11px 0;background:#112b3d;border:1px solid #41637a;border-radius:10px}
+.result-breakdown strong{display:block;font-size:12px;color:#d8f8f3;margin:6px 0 1px}
+.result-breakdown p{font-size:11px!important;color:#c7dfea!important;margin:2px 0 6px;line-height:1.6!important;overflow-wrap:anywhere}
+.result-settings{padding:8px;background:#183548;border-radius:8px;color:#cce2ef!important;font-size:11px!important}
+.result-actions{display:grid;grid-template-columns:1fr 1fr;gap:9px;align-items:stretch;margin-top:15px}
+.result-actions button{margin:0!important;padding:12px 9px!important;min-height:44px;font-size:12px}
+.result-reward-note{margin:8px 0!important;font-size:11px!important;color:#b0cbd8!important}
+.action-estimate{font-size:11px;color:#f6d58c;line-height:1.55;padding:9px;margin:8px 0;background:#213847;border-radius:8px;border-left:2px solid #e5c26b}
+.upgrade-button:focus-visible,.result-actions button:focus-visible,.modal-close-btn:focus-visible{outline:3px solid #f3ce7d;outline-offset:3px}
+@media(max-width:670px){.mission-brief{font-size:11px;padding:7px 9px}.result-actions{grid-template-columns:1fr}.result-breakdown{padding:10px}}
+@media(orientation:landscape) and (max-height:600px) and (max-width:1100px) and (pointer:coarse){
+ .mission-brief{display:none!important}
+ .result-actions{grid-template-columns:1fr 1fr;margin-top:8px}
+ .result-actions button{min-height:33px;padding:7px!important;font-size:10px}
+ .result-settings{margin:5px 0!important;font-size:10px!important;padding:5px}
+ .result-breakdown{margin:6px 0;padding:6px}
+ .result-breakdown p{font-size:10px!important;margin:1px 0}
+ .modal-close-btn{top:4px;right:7px;width:32px;height:32px}
+ .intro-caution,.intro-rule{font-size:10px!important;margin:5px 0!important;padding:5px 8px}
+ .intro-details{margin:5px 0;padding:5px 8px}
+}
