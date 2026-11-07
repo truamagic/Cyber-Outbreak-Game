@@ -46,3 +46,8 @@
  #tutorialSkipBtn{padding:5px 7px}
 }
 @media(prefers-reduced-motion:reduce){.tutorial-guide-track>span{transition:none}}
+
+/* Keep the floating instruction card opposite the map node being highlighted. */
+@media(orientation:landscape) and (max-height:600px) and (max-width:1100px) and (pointer:coarse){
+ .tutorial-guide[data-placement="top"]{top:calc(6px + env(safe-area-inset-top));bottom:auto}
+}

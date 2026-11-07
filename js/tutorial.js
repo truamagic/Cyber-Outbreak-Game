@@ -30,7 +30,12 @@
   status.textContent='強調表示された場所を操作';
   skip.textContent='チュートリアル終了';
   const target=document.querySelector(step.target);
+  guide.dataset.placement='bottom';
   if(target){
+   // Move the coach card away from a highlighted node on a small landscape screen.
+   const bounds=target.getBoundingClientRect();
+   const landscape=window.matchMedia('(orientation: landscape) and (max-height: 600px) and (max-width: 1100px) and (pointer: coarse)').matches;
+   if(landscape&&bounds.left<window.innerWidth*.54&&(bounds.top+bounds.height/2)>window.innerHeight*.52)guide.dataset.placement='top';
    target.classList.add('tutorial-spotlight');
    if(target.matches('#nodeAction,[data-upgrade],[data-shop],#endTurnBtn')){
     target.scrollIntoView({block:'nearest',inline:'nearest',behavior:'auto'});
