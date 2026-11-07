@@ -4,249 +4,14 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#0a1522">
-<title>CYBER OUTBREAK v0.3 | 病院サイバーリスク・シミュレーション</title>
-<style>
-:root{color-scheme:dark;--bg:#071321;--panel:#0e1e2f;--panel2:#122639;--border:#2b4358;--text:#eaf4ff;--muted:#94aec5;--cyan:#64e6d2;--blue:#8cbfff;--amber:#f7ca75;--red:#f18691;--shade:#142438;--shadow:0 24px 70px #020b1590}
-*{box-sizing:border-box}
-html{scroll-behavior:smooth}
-body{margin:0;font-family:ui-sans-serif,system-ui,-apple-system,"Hiragino Kaku Gothic ProN","Yu Gothic",Meiryo,sans-serif;background:radial-gradient(ellipse at 18% -15%,#143856 0%,transparent 46%),radial-gradient(ellipse at 100% 25%,#102840 0%,transparent 40%),var(--bg);color:var(--text);min-height:100vh}
-button,select{font:inherit}button{cursor:pointer}button:disabled{cursor:not-allowed;opacity:.44}button:focus-visible,select:focus-visible,[role="button"]:focus-visible{outline:3px solid var(--amber);outline-offset:3px}
-button:active:not(:disabled){transform:translateY(1px)}
-.wrap{max-width:1335px;margin:0 auto;padding:23px 23px 34px}
-header{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:19px;flex-wrap:wrap}
-.brand{display:flex;align-items:center;gap:13px}
-.brand-mark{width:52px;height:52px;display:grid;place-items:center;background:linear-gradient(135deg,#1c5b73,#1b374d);border:1px solid #4d8594;border-radius:15px;box-shadow:0 0 35px #30d9bd1c;font-size:28px;color:var(--cyan)}
-h1{font-size:clamp(21px,3vw,28px);letter-spacing:.07em;line-height:1.1;margin:0;font-weight:850}
-.tagline{font-size:12px;letter-spacing:.06em;color:var(--muted);margin-top:6px}
-.head-actions{display:flex;gap:9px;align-items:center;flex-wrap:wrap}
-.pill{display:inline-flex;align-items:center;gap:7px;border:1px solid #3b6170;background:#163044;color:#aef1e4;border-radius:99px;padding:7px 11px;font-size:12px;white-space:nowrap}
-.dot{width:7px;height:7px;background:var(--cyan);border-radius:50%;box-shadow:0 0 12px var(--cyan)}
-.small-btn{background:#142a40;color:var(--text);border:1px solid var(--border);border-radius:10px;padding:9px 13px;font-size:13px;font-weight:700}
-.small-btn:hover:not(:disabled){background:#1c3b53}
-.panel{background:linear-gradient(160deg,#102236f2,#0b1929f5);border:1px solid var(--border);border-radius:18px;box-shadow:0 15px 30px #020b152c}
-.stat-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:11px;margin-bottom:15px}
-.stat{padding:16px 17px;position:relative;overflow:hidden}
-.stat::after{content:"";position:absolute;width:105px;height:105px;border-radius:50%;background:#53b5d407;right:-34px;top:-50px;pointer-events:none}
-.stat-label{font-size:12px;color:var(--muted);letter-spacing:.02em;margin-bottom:7px}
-.stat-value{font-weight:850;font-size:clamp(20px,2.8vw,30px);line-height:1.18;letter-spacing:.025em;white-space:nowrap}
-.stat-value .unit{font-size:12px;color:var(--muted);font-weight:600;margin-left:5px}
-.stat-detail{font-size:11px;color:var(--muted);margin-top:6px}
-.teal{color:var(--cyan)}.gold{color:var(--amber)}.rose{color:var(--red)}
-.main{display:grid;grid-template-columns:minmax(0,1.65fr) minmax(316px,.85fr);gap:15px;align-items:start}
-.left-stack,.right-stack{display:grid;gap:15px;min-width:0}
-.p-head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:19px 20px 0}
-h2{margin:0;font-size:16px;letter-spacing:.025em}h3{margin:0;font-size:14px}.sub{font-size:12px;color:var(--muted);margin:7px 0 0;line-height:1.7}
-.legend{display:flex;align-items:center;gap:11px;flex-wrap:wrap;color:var(--muted);font-size:11px}
-.legend span{display:flex;align-items:center;gap:5px}.legend i{display:inline-block;border-radius:50%;width:8px;height:8px;background:var(--blue)}.legend .l-owned{background:var(--cyan)}.legend .l-fog{background:#637b90}
-.map-container{padding:7px 11px 5px;overflow:hidden}
-#network{display:block;width:100%;height:auto;max-height:475px;touch-action:manipulation}
-.map-bg{fill:#081a2b}.grid-pattern{stroke:#254055;stroke-width:.55;opacity:.56}
-.edge{fill:none;stroke:#46667d;stroke-width:3.5;stroke-linecap:round;opacity:.56}.edge.live{stroke:#48bfb2;opacity:.9;stroke-width:4}.edge.unknown{stroke-dasharray:4 9;opacity:.35}
-.node{cursor:pointer;transition:opacity .15s}.node .tile{fill:#172c41;stroke:#5b7d96;stroke-width:1.7}.node .number{fill:#b4c9db;font-size:11px;font-weight:850;letter-spacing:.05em}.node .name{fill:#e7f4ff;font-size:13px;font-weight:750}.node .info{fill:#a3bed0;font-size:10px}.node.is-hidden .tile{fill:#101f30;stroke:#43566b;stroke-dasharray:5 5}.node.is-hidden .name,.node.is-hidden .info{fill:#6f8598}.node.is-owned .tile{fill:#133e45;stroke:#49d6c3;stroke-width:2.2}.node.is-owned .number{fill:#88f9e8}.node.is-reachable .tile{fill:#17324b;stroke:#7eb8ee}.node.is-locked .tile{stroke:#ecba67}.node.is-selected .selection{display:block}.node .selection{fill:none;stroke:#f4cb7f;stroke-width:2;stroke-dasharray:4 4;display:none}.node:hover .tile{filter:brightness(1.2)}.node.is-owned .pulse{fill:#5de1cd;opacity:.11;animation:breathe 2.5s infinite}.node:not(.is-owned) .pulse{display:none}@keyframes breathe{50%{opacity:.24;transform:scale(1.1)}}
-.map-footer{display:flex;align-items:center;justify-content:space-between;gap:10px;border-top:1px solid #253e50;margin:0 18px;padding:12px 1px 16px;flex-wrap:wrap}
-.map-caption{color:var(--muted);font-size:11px;line-height:1.55}.map-banner{color:var(--cyan);font-weight:800;font-size:12px;letter-spacing:.035em}
-.goal-card{padding:18px 20px}.bar-head{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-top:16px;font-size:12px}.bar-head strong{color:#d9eaf9}.progress{height:9px;background:#213a4d;border-radius:20px;overflow:hidden;margin-top:8px;border:1px solid #305066}.progress>div{height:100%;width:0%;background:linear-gradient(90deg,#1b9ca3,#63ead1);border-radius:20px;transition:width .24s}.progress.alert>div{background:linear-gradient(90deg,#e3a44a,#f17982)}
-.notice{margin-top:15px;padding:11px 12px;background:#1c2e40;border-left:3px solid #5ea8c1;color:#b8d0e1;font-size:12px;line-height:1.65;border-radius:4px 9px 9px 4px}
-.detail{padding:20px}.detail-title{display:flex;align-items:center;gap:12px}.detail-icon{width:49px;height:49px;display:grid;place-items:center;flex:none;border:1px solid #497d8e;background:#173849;color:var(--cyan);border-radius:12px;font-size:22px;font-weight:850}.detail-status{font-size:11px;color:var(--cyan);font-weight:800;letter-spacing:.05em}.detail-name{font-size:19px;font-weight:850;margin:3px 0}.description{font-size:12px;color:var(--muted);line-height:1.65;margin:14px 0}.kv{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.kv-item{background:#172b3f;border:1px solid #2a4559;border-radius:11px;padding:11px}.kv-item small{display:block;font-size:11px;color:var(--muted);margin-bottom:5px}.kv-item strong{font-size:18px;letter-spacing:.03em}.detail-note{font-size:11px;color:var(--muted);min-height:26px;margin-top:12px;line-height:1.6}
-.primary{border:1px solid #60ddcc;border-radius:10px;background:linear-gradient(120deg,#4fd1c0,#278fa0);color:#07232c;font-weight:850;padding:12px 15px;transition:filter .15s;width:100%;margin-top:11px}
-.primary:hover:not(:disabled){filter:brightness(1.12)}.secondary{border:1px solid #4c728a;border-radius:10px;background:#17354b;color:#cfeaff;font-weight:800;padding:12px 15px;width:100%}.secondary:hover:not(:disabled){background:#21445e}
-.btn-row{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:12px}
-.btn-row .primary{margin:0}.btn-row .secondary{padding:11px 8px}
-.upgrade{padding:18px 20px}.upgrade-list{display:grid;gap:10px;margin-top:16px}.upgrade-item{display:grid;grid-template-columns:44px 1fr auto;gap:11px;align-items:center;padding:12px 10px;border:1px solid #2c4557;border-radius:12px;background:#12283b}.upgrade-icon{width:43px;height:43px;display:grid;place-items:center;font-size:21px;background:#1d3a50;border-radius:11px;border:1px solid #335d74}.upgrade-name{font-size:13px;font-weight:800;display:flex;gap:8px;align-items:center;flex-wrap:wrap}.level{font-size:10px;font-weight:750;color:var(--cyan)}.upgrade-description{font-size:11px;color:var(--muted);line-height:1.55;margin-top:4px}.upgrade-button{border:1px solid #4e95a0;background:#153d4c;border-radius:9px;color:#b5f6e7;font-weight:850;font-size:12px;padding:9px 10px;white-space:nowrap;min-width:69px}.upgrade-button:hover:not(:disabled){background:#246171}.upgrade-button:disabled{color:#8b9caa}
-.activity{padding:18px 20px}.feed{margin-top:14px;max-height:262px;min-height:145px;overflow:auto;display:grid;align-content:start;gap:0}.feed-item{display:grid;grid-template-columns:42px 1fr;align-items:start;gap:7px;padding:10px 0;border-top:1px solid #253c4e;font-size:12px;line-height:1.65}.feed-item:first-child{border-top:0;padding-top:2px}.feed-turn{font-size:10px;font-weight:850;color:var(--cyan);padding-top:2px}.feed-item.negative .feed-turn{color:var(--red)}.feed-item.positive .feed-turn{color:var(--amber)}
-.howto{padding:18px 20px}.howto p{font-size:12px;color:var(--muted);line-height:1.8;margin:9px 0 0}.note-footer{font-size:11px;color:#718ea6;text-align:center;padding:16px 7px 0;line-height:1.7}
-.overlay{position:fixed;inset:0;background:#03101edc;z-index:10;display:flex;align-items:center;justify-content:center;padding:18px;backdrop-filter:blur(9px)}.overlay[hidden]{display:none}.modal{max-width:570px;width:100%;max-height:calc(100vh - 36px);overflow-y:auto;background:linear-gradient(145deg,#152f43,#0e1d30);border:1px solid #4b7182;box-shadow:0 30px 110px #000b;border-radius:22px;padding:29px}
-.modal-symbol{font-size:27px;width:58px;height:58px;border:1px solid #4ca79e;border-radius:15px;background:#1e545a;display:grid;place-items:center;margin-bottom:18px}.overline{font-size:11px;color:var(--cyan);font-weight:850;letter-spacing:.15em}.modal h2{font-size:clamp(23px,5vw,32px);line-height:1.3;margin:10px 0 9px}.modal p{font-size:13px;color:#b0c8da;line-height:1.85}.modal ul{font-size:13px;color:#d0e3ef;line-height:1.9;padding-left:21px}.modal li{padding-left:3px}.difficulty{margin:18px 0 0}.difficulty label{display:block;color:#c9deeb;font-size:12px;font-weight:850;margin-bottom:8px}.difficulty select{width:100%;appearance:none;background:#10283c;border:1px solid #567a8e;border-radius:10px;color:#eff7ff;padding:12px 14px}.modal .primary{margin-top:17px;padding:15px}.fineprint{margin-top:12px!important;color:#8cabbd!important;font-size:11px!important}
-.end-summary{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:18px 0}.end-summary>div{background:#163449;border:1px solid #35576a;border-radius:11px;text-align:center;padding:11px 7px}.end-summary strong{display:block;font-size:22px;color:var(--cyan)}.end-summary small{color:var(--muted);font-size:10px}.debrief{padding:15px;background:#172e42;border-radius:11px;border:1px solid #38586b}.debrief b{font-size:13px}.debrief p{margin:5px 0 0;font-size:12px}
-@media(max-width:1020px){
-.main{display:flex;flex-direction:column;gap:10px}.left-stack,.right-stack{display:contents}.main .panel{width:100%}
-.left-stack>.panel:nth-child(1){order:1}.right-stack>.panel:nth-child(1){order:2}
-.left-stack>.panel:nth-child(2){order:3}.right-stack>.panel:nth-child(2){order:4}
-.left-stack>.panel:nth-child(3){order:5}.right-stack>.panel:nth-child(3){order:6}
-}
-@media(max-width:740px){.wrap{padding:14px 11px 23px}.brand-mark{width:43px;height:43px;border-radius:11px}.stat-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.stat{padding:12px 14px}.stat-value{font-size:23px}.main{gap:10px}.left-stack,.right-stack{gap:10px}.right-stack{grid-template-columns:1fr}.p-head{padding:15px 14px 0;align-items:start;flex-direction:column}.map-container{padding:6px 4px 0;overflow-x:auto;overscroll-behavior-x:contain}#network{width:690px;max-height:none;max-width:none}.map-footer{margin:0 12px;padding:10px 0 14px}.goal-card,.detail,.upgrade,.activity,.howto{padding:16px}.node .name{font-size:15px}.modal{padding:22px}.modal h2{font-size:24px}}
-@media(max-width:420px){.head-actions{width:100%}.tagline{font-size:10px}.stat-detail{font-size:10px}.upgrade-item{grid-template-columns:39px 1fr auto;gap:8px;padding:10px 8px}.upgrade-icon{width:38px;height:38px;font-size:18px}.upgrade-button{min-width:57px;padding:8px 7px;font-size:11px}.upgrade-description{font-size:10px}}
-@media(prefers-reduced-motion:reduce){*,*:before,*:after{animation-duration:.01ms!important;transition-duration:.01ms!important;scroll-behavior:auto!important}}
-
-/* CYBER OUTBREAK v0.2 additions */
-.legend .l-cut{background:#f2868b}
-.edge.cut{stroke:#f2868b;stroke-width:5;stroke-dasharray:6 9;opacity:.98}
-.edge.cut-halo{stroke:#f2868b;stroke-opacity:.19;stroke-width:13}
-.edge-break{fill:#4b2633;stroke:#e98c96;stroke-width:2}
-.edge-break-text{font-weight:900;font-size:18px;fill:#ffe0df;text-anchor:middle}
-.node.is-isolated .tile{fill:#402d35;stroke:#f0a771;stroke-dasharray:5 3}
-.node.is-generator .tile{stroke:#f0c471;stroke-width:2.5}
-.node .gen-marker{fill:#ffc879;font-size:13px;font-weight:850}
-.action-stack{display:grid;gap:8px;margin-top:12px}
-.action-stack button{margin-top:0;font-size:12px;line-height:1.3;padding:11px}
-.action-stack .action-sub{font-size:10px;color:var(--muted);margin:0 1px 2px;line-height:1.5}
-.action-stack .amber-button{background:#49371e;color:#ffddb1;border-color:#8b7149}
-.action-stack .danger-button{background:#442936;color:#ffced4;border-color:#955b67}
-.action-stack .disabled-explain{color:#96acbc;font-size:10px;line-height:1.5}
-.status-chips{display:flex;gap:7px;flex-wrap:wrap;margin-top:13px}
-.status-chip{background:#1e3548;color:#a6c9dd;padding:5px 9px;border:1px solid #3b5469;border-radius:999px;font-size:11px}
-.status-chip.alert{border-color:#8f5665;color:#ffc0cb;background:#402837}
-.awards{padding:18px 20px}
-.awards-heading{display:flex;justify-content:space-between;align-items:start;gap:12px}
-.award-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:16px 0}
-.award{border:1px solid #2c4759;background:#102536;border-radius:11px;padding:10px;display:grid;grid-template-columns:28px 1fr;gap:8px;align-items:start;min-width:0}
-.award .medal{width:26px;height:26px;border:1px solid #4e687c;background:#1e394d;border-radius:8px;display:grid;place-items:center;color:#6e8ba3;font-weight:800}
-.award.obtained{border-color:#5b806e;background:#1a3b3b}
-.award.obtained .medal{color:#fee09c;border-color:#e0b45f;background:#4a442d}
-.award strong{display:block;font-size:11px;line-height:1.5;overflow-wrap:anywhere}
-.award small{display:block;font-size:10px;color:var(--muted);line-height:1.4;margin-top:3px}
-.awards #clearAwardsBtn{width:100%}
-@media(max-width:1020px){.left-stack>.panel:nth-child(1){order:1}.right-stack>.panel:nth-child(1){order:2}.left-stack>.panel:nth-child(2){order:3}.right-stack>.panel:nth-child(2){order:4}.right-stack>.panel:nth-child(3){order:5}.left-stack>.panel:nth-child(3){order:6}.right-stack>.panel:nth-child(4){order:7}}
-@media(max-width:740px){.awards{padding:16px}.award-grid{gap:6px}.award{padding:9px;gap:7px}}
-
-/* CYBER OUTBREAK v0.3 — Tactical command console (all local, no assets) */
-:root{--bg:#070e19;--panel:#0c1a2b;--panel2:#142337;--border:#263a51;--text:#edf6ff;--muted:#95abc1;--cyan:#64eddb;--blue:#87aef9;--amber:#ffc97c;--red:#ff8795;--shadow:0 22px 68px #0005}
-*{box-sizing:border-box}
-html{scroll-behavior:smooth;scroll-padding-top:22px}
-body{font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Hiragino Kaku Gothic ProN","Yu Gothic",Meiryo,sans-serif;background:radial-gradient(ellipse 680px 550px at 87% 2%,#1243535e,transparent 76%),radial-gradient(ellipse 680px 600px at -9% 45%,#132b5252,transparent 76%),linear-gradient(120deg,#07101d,#080f1b 45%,#0b1622);min-height:100vh;overflow-x:hidden}
-body::before{content:"";pointer-events:none;position:fixed;inset:0;z-index:0;opacity:.23;background:repeating-linear-gradient(0deg,transparent 0 75px,#3d668315 76px),repeating-linear-gradient(90deg,transparent 0 75px,#3d668315 76px)}
-button,a{ -webkit-tap-highlight-color:transparent }button{font:inherit}a{color:inherit}button:focus-visible,a:focus-visible,select:focus-visible,[role="button"]:focus-visible{outline:2px solid #ffd792;outline-offset:4px}
-.wrap{max-width:1460px;position:relative;z-index:1;margin:auto;padding:24px 26px 44px}
-.panel{background:linear-gradient(145deg,#132336eb,#0b1829f5 84%);border:1px solid #284159;border-radius:17px;box-shadow:0 18px 48px #0004;position:relative;overflow:hidden}
-.panel::before{content:"";position:absolute;top:0;left:19px;right:19px;height:1px;background:linear-gradient(90deg,transparent,#8acbe03d 50%,transparent);pointer-events:none}
-.p-head{padding:21px 23px 0}
-h2{letter-spacing:.025em}h3{font-size:15px}
-.sub{color:#9eafc2;font-size:12px;line-height:1.6}
-.topbar{display:flex;align-items:center;justify-content:space-between;gap:17px;margin:0 0 22px;flex-wrap:wrap}
-.brand{gap:14px}.brand-mark{width:52px;height:52px;border:1px solid #3d8a98;border-radius:15px;background:linear-gradient(140deg,#122c42,#123d4a);display:grid;place-items:center;position:relative;box-shadow:inset 0 0 25px #4df8df12,0 0 25px #4edcd725;color:var(--cyan)}
-.brand-mark svg{width:34px;height:34px}.brand-mark:before{content:"";position:absolute;inset:-5px;border:1px solid #5cabb738;border-radius:19px}
-.brand-micro{font:700 9px/1.3 ui-monospace,SFMono-Regular,Consolas,monospace;color:#79d9ce;letter-spacing:.2em;margin-bottom:5px}
-h1{font-size:26px;font-weight:900;letter-spacing:.045em;line-height:1.1}h1 span{color:var(--cyan)}h1 small{font:800 10px/1.2 ui-monospace,Consolas,monospace;color:#93b6ce;margin-left:7px;vertical-align:middle;letter-spacing:.05em;border:1px solid #31516a;padding:3px 5px;border-radius:4px}
-.tagline{font-size:11px;color:#819fb6;margin-top:7px;letter-spacing:.055em}
-.head-actions{display:flex;gap:9px;align-items:center;flex-wrap:wrap}
-.top-pill{display:flex;align-items:center;gap:9px;font:700 10px ui-monospace,Consolas,monospace;letter-spacing:.05em;color:#a7d5d5;background:#11283a;border:1px solid #284f58;padding:10px 13px;border-radius:8px}
-.top-pill .led{width:7px;height:7px;flex:none;background:#68eac9;border-radius:50%;box-shadow:0 0 0 3px #68eac91a,0 0 12px #68eac99e;animation:blip 2.6s ease-in-out infinite}
-@keyframes blip{50%{box-shadow:0 0 0 5px #68eac917,0 0 22px #68eac9b0}}
-.small-btn{border:1px solid #38556a;border-radius:9px;background:#13263a;color:#d7eaff;font-weight:800;font-size:12px;padding:11px 14px;transition:background .2s,border-color .2s}
-.small-btn:hover:not(:disabled){background:#254257;border-color:#6a9baa}
-.mono{font-family:ui-monospace,SFMono-Regular,Consolas,"Courier New",monospace;letter-spacing:.035em}
-.hero{display:flex;position:relative;justify-content:space-between;align-items:center;gap:20px;padding:22px 26px 22px 28px;min-height:137px;border:1px solid #2d5266;border-radius:17px;background:radial-gradient(ellipse at 83% 45%,#16445c68,transparent 44%),linear-gradient(102deg,#122e43,#0c1b2f 78%);overflow:hidden;margin-bottom:12px}
-.hero:before{content:"";position:absolute;inset:-100px -160px -100px 52%;opacity:.18;background:repeating-radial-gradient(circle at center,transparent 0 21px,#72e4dd 22px 23px,transparent 24px 57px);pointer-events:none}
-.hero:after{content:"";position:absolute;top:0;left:0;width:4px;height:100%;background:linear-gradient(#7ff5e1,#457dd2);box-shadow:0 0 25px #79ebdd55}
-.hero>*{position:relative;z-index:1}
-.eyebrow{display:flex;align-items:center;gap:9px;font:800 10px ui-monospace,Consolas,monospace;letter-spacing:.16em;color:#6bdecf}
-.eyebrow .bar{width:22px;height:2px;background:currentColor}
-.hero h2{font-size:clamp(18px,2.2vw,27px);font-weight:850;letter-spacing:.035em;margin:8px 0 6px}
-.hero-desc{max-width:620px;color:#aec5d8;font-size:12px;line-height:1.7;margin:0}
-.hero-right{flex:none;display:flex;align-items:center;gap:16px;padding-left:13px}
-.dial{--dial-deg:9deg;--dial-color:#6fecd2;width:94px;height:94px;border-radius:50%;padding:7px;background:conic-gradient(var(--dial-color) 0 var(--dial-deg),#294459 var(--dial-deg) 360deg);box-shadow:0 0 32px #4dd2ca1a;transition:background .3s}
-.dial-inner{width:100%;height:100%;background:#0e2334;border-radius:50%;display:flex;flex-direction:column;align-items:center;justify-content:center;box-shadow:inset 0 0 0 1px #3d6972}
-.dial-inner strong{font:900 27px/1 ui-monospace,Consolas,monospace;color:#d9fff9}.dial-inner small{font:700 8px ui-monospace,Consolas,monospace;letter-spacing:.18em;color:#93c9c4;margin-top:7px}
-.hero-info{min-width:135px}.hero-info small{display:block;font:800 9px ui-monospace,Consolas,monospace;letter-spacing:.15em;color:#78a8bf}.hero-info strong{display:block;font-size:15px;color:#f1fbff;margin-top:8px}.hero-info span{display:block;color:#9bb4c8;font:700 11px ui-monospace,Consolas,monospace;margin-top:9px}
-.pulse-strip{display:flex;align-items:center;gap:11px;background:#0e1f30;border:1px solid #244158;border-radius:11px;padding:11px 16px;margin-bottom:12px;min-height:46px}
-.pulse-icon{width:26px;height:26px;border-radius:7px;border:1px solid #436977;color:#8cece0;display:grid;place-items:center;font-size:17px;flex:none}
-.pulse-label{font:800 10px ui-monospace,Consolas,monospace;letter-spacing:.1em;color:#6b95a9;white-space:nowrap}
-.pulse-text{font-size:12px;color:#bed1dd;min-width:0;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.pulse-index{font:800 10px ui-monospace,Consolas,monospace;color:#70d8c6;white-space:nowrap}
-.quicknav{display:flex;gap:5px;align-items:center;overflow:auto;white-space:nowrap;margin:0 0 14px;padding:0 2px 2px;scrollbar-width:thin}
-.quicknav a{display:inline-flex;align-items:center;gap:9px;text-decoration:none;color:#97b4c9;border:1px solid transparent;border-radius:8px;font-size:12px;font-weight:750;padding:9px 15px;transition:.2s;background:#0e1c2d}
-.quicknav a:hover,.quicknav a:focus-visible{color:#c4fff1;border-color:#46717e;background:#18384a}.quicknav .nav-number{font:800 10px ui-monospace,Consolas,monospace;color:#6cbfb5}
-.stat-grid{grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin-bottom:14px}
-.stat{min-height:111px;padding:18px 18px 15px;border-radius:14px}
-.stat::after{content:"";position:absolute;right:-15px;top:-17px;width:98px;height:98px;border-radius:50%;background:radial-gradient(circle,#59e4cb17,transparent 68%)}
-.stat-ornament{position:absolute;right:14px;top:14px;display:grid;place-items:center;width:33px;height:33px;border-radius:9px;border:1px solid #335165;color:#7bd9cd;font-size:16px;background:#152d40}
-.stat:nth-child(2) .stat-ornament{color:#8ebdf9}.stat:nth-child(3) .stat-ornament{color:#ffc278}.stat:nth-child(4) .stat-ornament{color:#ffa3ac}
-.stat-label{font-size:11px;letter-spacing:.07em;font-weight:750;color:#9bb1c4;margin-bottom:10px;padding-right:33px}
-.stat-value{font:900 clamp(22px,2.5vw,31px)/1.2 ui-monospace,SFMono-Regular,Consolas,monospace;letter-spacing:-.025em;color:#f0f9ff;white-space:normal}
-.stat-value.teal{color:#74f2d7}.stat-value.gold{color:#f6d08c}
-.stat-value .unit{font:700 11px ui-monospace,Consolas,monospace;color:#809bac;margin-left:4px}
-.stat-detail{font-size:10px;color:#81a4b6;margin-top:8px}
-.stat-track{position:absolute;bottom:0;left:0;width:100%;height:2px;background:linear-gradient(90deg,#4fe0cd,transparent 80%);opacity:.5}
-.stat:nth-child(2) .stat-track{background:linear-gradient(90deg,#72aaf4,transparent 80%)}.stat:nth-child(3) .stat-track{background:linear-gradient(90deg,#eac46e,transparent 80%)}.stat:nth-child(4) .stat-track{background:linear-gradient(90deg,#f18e9d,transparent 80%)}
-.main{display:grid;grid-template-columns:minmax(0,1.72fr) minmax(326px,.84fr);gap:14px;align-items:start}
-.left-stack,.right-stack{display:grid;gap:14px;min-width:0}
-.map-panel{border-color:#356079;background:linear-gradient(180deg,#0f2539,#071625 95%)}
-.map-panel .p-head{display:flex;align-items:flex-start;justify-content:space-between;padding:19px 20px 14px;border-bottom:1px solid #244154;gap:12px}
-.section-no{font:800 10px ui-monospace,Consolas,monospace;letter-spacing:.14em;color:#6e9cac;display:block;margin-bottom:7px}
-.map-panel h2{font-size:17px;letter-spacing:.02em}.map-panel .sub{margin-top:5px}
-.map-actions{display:flex;flex-direction:column;align-items:flex-end;gap:8px;flex:none}
-.map-live{font:800 10px ui-monospace,Consolas,monospace;letter-spacing:.08em;display:flex;align-items:center;gap:6px;color:#8fe1d9}
-.map-live .dot{width:6px;height:6px;border-radius:50%;background:#7fe8cb;box-shadow:0 0 12px #7fe8cb}
-.map-btn{display:none;font-size:11px;background:#132b41;border:1px solid #38687a;color:#b6dce8;border-radius:7px;padding:7px 9px}
-.map-btn:hover{background:#205069}
-.map-container{padding:8px 10px 0;position:relative;overflow:auto;overscroll-behavior-x:contain;scrollbar-width:thin;scrollbar-color:#375c72 #0b1c2e}
-.map-container::after{content:"";pointer-events:none;position:absolute;left:12px;right:12px;top:0;height:100%;background:linear-gradient(to bottom,transparent 47%,#65ffe509 49.5%,#65ffe512 50%,transparent 52%);background-size:100% 190px;animation:scanning 9s linear infinite;opacity:.5}
-@keyframes scanning{from{background-position:0 -190px}to{background-position:0 190px}}
-#network{display:block;width:100%;height:auto;max-height:510px;min-height:340px;touch-action:pan-x}
-.map-bg{fill:#0a1b2d}.grid-pattern{stroke:#426079;stroke-width:.6;opacity:.38}
-.edge{stroke:#476780;stroke-width:3;opacity:.55;stroke-linecap:round;transition:stroke .3s}.edge.live{stroke:#45d9c4;stroke-width:3.5;opacity:.76;stroke-dasharray:7 9;animation:edge-flow 16s linear infinite;filter:drop-shadow(0 0 4px #45d9c47d)}
-@keyframes edge-flow{to{stroke-dashoffset:-240}}
-.edge.unknown{stroke:#3e5a77;stroke-width:2;stroke-dasharray:3 7;opacity:.5}.edge.cut{stroke:#ff8f9f;stroke-width:4.5;stroke-dasharray:6 8;opacity:1;filter:drop-shadow(0 0 6px #ff87954c)}.edge.cut-halo{stroke:#ff748e;stroke-width:14;opacity:.09}
-.edge-break{fill:#3b1c30;stroke:#ff8894;stroke-width:1.8;filter:drop-shadow(0 0 6px #ff6b88aa)}.edge-break-text{fill:#ffe8ea;font-size:16px;font-weight:900;text-anchor:middle}
-.node{cursor:pointer;outline:0}.node .tile{fill:#132638;stroke:#54748e;stroke-width:1.8;filter:drop-shadow(0 6px 8px #0005);transition:fill .2s,stroke .2s}.node .selection{fill:none;stroke:#ffd38c;stroke-width:1.8;stroke-dasharray:4 4;filter:drop-shadow(0 0 5px #fac86b);display:none}.node .pulse{fill:#51e6ce;opacity:.09;animation:breathe 3.6s ease-in-out infinite}.node:not(.is-owned) .pulse{fill:#9bc9f1;opacity:.035}.node .number{font:900 10px ui-monospace,Consolas,monospace;fill:#80a6ba;letter-spacing:.13em}.node .name{font-size:12px;font-weight:850;fill:#edf7ff}.node .info{font-size:10px;font-weight:700;fill:#96b0c0}.node .node-icon-box{fill:#1a3d50;stroke:#39667a;stroke-width:1.2}.node .node-glyph{stroke:#90d9ea;stroke-width:2;fill:none;stroke-linejoin:round;stroke-linecap:round}
-.node .node-indicator{fill:#669fb6}.node.is-owned .tile{fill:#103941;stroke:#46dcc5;stroke-width:2}.node.is-owned .node-icon-box{fill:#14524f;stroke:#5ddac4}.node.is-owned .node-glyph{stroke:#abffe9}.node.is-owned .node-indicator{fill:#67ebd5}
-.node.is-reachable .tile{fill:#183451;stroke:#7cacec;stroke-width:1.8}.node.is-hidden{opacity:.56}.node.is-hidden .tile{fill:#0e2031;stroke:#3d5269;stroke-dasharray:5 4}.node.is-hidden .name,.node.is-hidden .info{fill:#7491a7}.node.is-locked .tile,.node.is-isolated .tile{fill:#3a2a36;stroke:#eaa16c;stroke-dasharray:5 4}.node.is-isolated .node-indicator{fill:#f0ab7d}
-.node.is-generator .tile{stroke:#ffc66e;stroke-width:2.5}.node.is-selected .selection{display:block}.node:focus-visible .selection{display:block;stroke:#fff}.node:hover .tile{stroke:#fff1c5;stroke-width:2.5}
-.node .gen-marker{font-size:10px;font-weight:900;fill:#ffd493}
-.node-frame-line{stroke:#83e8cf;stroke-opacity:.4;stroke-width:1.7}
-@keyframes breathe{50%{opacity:.2}}
-.map-footer{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;margin:0 20px;padding:13px 0 17px;border-top:1px solid #25445a}.map-caption{font-size:11px;color:#89a7bb}.map-banner{font:800 11px ui-monospace,Consolas,monospace;letter-spacing:.11em;color:#82e8dc}
-.map-legend{display:flex;align-items:center;gap:12px;flex-wrap:wrap;padding:12px 20px;border-top:1px solid #244457;background:#0d2234}
-.map-legend span{display:flex;align-items:center;gap:6px;color:#a6bfd1;font-size:11px}.map-legend i{width:8px;height:8px;display:inline-block;border-radius:3px;background:#71b9fc}.map-legend .l-owned{background:#62edcf}.map-legend .l-fog{background:#57708b}.map-legend .l-cut{background:#f07e91}
-.goal-card,.detail,.upgrade,.activity,.awards,.howto{padding:20px 21px}
-.section-header{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:3px}
-.section-badge{font:700 10px ui-monospace,Consolas,monospace;color:#7faabc;border:1px solid #35546a;border-radius:6px;background:#152d42;padding:6px 9px}
-.bar-head{margin-top:18px;font-size:12px;color:#b7c8d6}.bar-head strong{font:800 11px ui-monospace,Consolas,monospace;color:#e4fff9}
-.progress{height:8px;background:#203950;border:0;border-radius:4px;margin-top:9px;overflow:hidden}.progress>div{background:linear-gradient(90deg,#347ebd,#67e7d8);border-radius:4px;height:100%;transition:width .35s}.progress.alert>div{background:linear-gradient(90deg,#f7be62,#f06b82)}
-.notice{background:#132c42;border-left:3px solid #6eb9de;border-radius:3px 8px 8px 3px;color:#c1d7e3;margin-top:17px;padding:12px;font-size:11px}
-.status-chips{display:flex;gap:6px;flex-wrap:wrap;margin-top:14px}.status-chip{border:1px solid #33526a;background:#172d41;color:#a6cada;border-radius:6px;font:700 10px/1.4 ui-monospace,Consolas,monospace;padding:6px 8px}.status-chip.alert{color:#ffb7c3;border-color:#8c5167;background:#402333}
-.detail{border-color:#426b74}.detail h2{display:flex;align-items:center;gap:9px}.detail h2::before{content:"";width:6px;height:6px;border:1px solid #7ff5e1;background:#48b5a8;transform:rotate(45deg)}
-.detail-title{align-items:center;gap:12px;margin-top:17px}.detail-icon{background:linear-gradient(140deg,#164b55,#102b42);border:1px solid #4c918f;border-radius:12px;width:57px;height:57px;font:900 20px ui-monospace,Consolas,monospace;box-shadow:0 0 19px #3fe9d519;color:#9df7e4}
-.detail-status{font:800 10px ui-monospace,Consolas,monospace;color:#68dec9;letter-spacing:.09em}.detail-name{font-size:20px;margin:5px 0 0}
-.description{margin:17px 0;color:#a9c0d1;font-size:12px;line-height:1.7}
-.kv{gap:9px}.kv-item{background:#112a40;border:1px solid #305167;border-radius:9px;padding:12px}.kv-item small{font-size:10px;color:#8caaba;font-weight:750}.kv-item strong{font:800 17px ui-monospace,Consolas,monospace;color:#e3f4ff}
-.detail-note{background:#0e2639;border-left:2px solid #598aab;padding:10px 11px;margin-top:14px;font-size:11px;color:#abc5d4;min-height:auto;border-radius:0 6px 6px 0;line-height:1.6}
-.primary{background:linear-gradient(112deg,#83efd9,#43bcce);border:0;border-radius:9px;color:#052732;padding:13px 15px;font-weight:900;font-size:12px;box-shadow:0 4px 19px #39d6bc1d;margin:0;transition:filter .18s,transform .18s}
-.primary:hover:not(:disabled){filter:brightness(1.09)}.primary:disabled{box-shadow:none}.secondary{border-radius:9px;border:1px solid #44657d;background:#193249;color:#d7ebfa;font-weight:800;font-size:12px;padding:12px 14px}
-.secondary:hover:not(:disabled){background:#21465e}
-.action-stack{display:grid;gap:8px;margin-top:14px}.action-stack button{min-height:43px;display:flex;align-items:center;justify-content:center;gap:8px;margin:0}.action-stack .action-sub{font-size:10px;color:#849faf;line-height:1.55;margin:0 2px 4px}
-.action-stack .amber-button{background:#322c28;color:#ffd9a2;border-color:#846949}.action-stack .danger-button{background:#332733;color:#ffbfc8;border-color:#785464}
-.btn-row{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(0,.8fr);gap:9px;margin-top:15px}
-.btn-row #endTurnBtn{background:linear-gradient(105deg,#264865,#1b3653);border-color:#5c93aa;color:#e9faff}.btn-row button:disabled{opacity:.45}
-.upgrade-list{display:grid;gap:9px;margin-top:16px}.upgrade-item{display:grid;grid-template-columns:42px minmax(0,1fr) auto;align-items:center;gap:10px;padding:12px 10px;background:#10273a;border:1px solid #2e465d;border-radius:10px}
-.upgrade-icon{width:42px;height:42px;border-radius:10px;background:#1a354c;border:1px solid #375b77;font-size:20px;color:#79e0ce}.upgrade-name{font-size:13px}.level{font:800 10px ui-monospace,Consolas,monospace;color:#6fe5d0}.upgrade-description{font-size:11px;color:#92aebf;line-height:1.4}.upgrade-button{border-radius:7px;border:1px solid #467f87;background:#173b48;color:#99f2e4;font:850 11px ui-monospace,Consolas,monospace;padding:9px;min-width:70px}
-.upgrade-button:hover:not(:disabled){background:#205969}.upgrade-ticks{display:flex;gap:4px;margin-top:9px}.upgrade-ticks span{height:3px;flex:1;background:#254154;border-radius:2px}.upgrade-ticks span.on{background:#6de9d3;box-shadow:0 0 8px #4de2d390}
-.feed{display:grid;gap:0;margin-top:16px;max-height:300px;min-height:124px;scrollbar-width:thin;scrollbar-color:#325d72 #0b1b2b}
-.feed-item{position:relative;display:grid;grid-template-columns:38px minmax(0,1fr);gap:12px;padding:11px 0;border-top:1px solid #274057;line-height:1.65;font-size:12px;color:#bfd2e1}
-.feed-item:first-child{border-top:0}.feed-item:before{position:absolute;content:"";width:5px;height:5px;border-radius:50%;top:17px;left:37px;background:#5ba1ad}
-.feed-turn{font:800 10px ui-monospace,Consolas,monospace;color:#7fcfdf;padding-top:3px}.feed-item.positive .feed-turn{color:#85ead6}.feed-item.negative .feed-turn{color:#ffa0aa}.feed-item.negative:before{background:#fa8894}.feed-item.positive:before{background:#73dbb8}
-.awards-heading{display:flex;align-items:start;justify-content:space-between;gap:10px}.award-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:15px 0}.award{background:#102337;border:1px solid #2c4257;border-radius:9px;display:grid;grid-template-columns:28px 1fr;gap:8px;padding:10px;min-width:0}.award .medal{border:1px solid #405971;background:#1c3348;color:#738b9e;border-radius:7px;width:27px;height:27px;display:grid;place-items:center;font-weight:900}.award.obtained{border-color:#4f866f;background:#163932}.award.obtained .medal{background:#3b4530;border-color:#a9a35e;color:#ffe09b}.award strong{display:block;font-size:11px;line-height:1.4}.award small{display:block;color:#809eae;font-size:10px;line-height:1.4;margin-top:4px}
-.award-progress{height:5px;background:#244055;border-radius:99px;overflow:hidden;margin-top:13px}.award-progress>span{display:block;height:100%;background:linear-gradient(90deg,#5ae0c8,#d7bb74);width:0%;transition:width .3s}
-.award-filters{display:flex;flex-wrap:wrap;gap:6px;margin-top:12px}.filter-btn{background:#152b40;border:1px solid #39546a;color:#9eb8ca;border-radius:7px;font-size:11px;font-weight:750;padding:7px 10px}.filter-btn[aria-pressed="true"]{background:#164c4a;border-color:#6acebe;color:#e4fff4}
-.awards .small-btn{width:100%;font-size:11px}.howto{background:linear-gradient(145deg,#0e2737,#0b1c2b)}.howto p{font-size:12px;line-height:1.8;color:#a6c0cd}
-.note-footer{font:600 10px/1.75 ui-monospace,Consolas,monospace;color:#68879d;margin-top:12px;text-align:center;letter-spacing:.03em}
-.overlay{position:fixed;inset:0;background:#030b17e9;backdrop-filter:blur(12px);display:flex;align-items:center;justify-content:center;padding:18px;z-index:20}.overlay[hidden]{display:none}
-.modal{max-width:580px;max-height:calc(100dvh - 36px);overflow-y:auto;background:radial-gradient(ellipse at 95% 0%,#1d4e6080,transparent 50%),linear-gradient(155deg,#142d41,#0d1b2c);border:1px solid #3d7285;border-radius:20px;padding:30px;box-shadow:0 30px 120px #000c;position:relative}
-.modal:before{content:"";position:absolute;top:0;left:24px;width:120px;height:2px;background:#71edda;box-shadow:0 0 15px #6fddde80}
-.modal-symbol{width:66px;height:66px;font-size:30px;border:1px solid #559f9b;background:linear-gradient(135deg,#1d555e,#164055);color:#b5fff2;border-radius:16px;margin-bottom:16px;box-shadow:0 0 30px #4fddb41b}
-.overline{color:#6fe5cf;font:800 11px ui-monospace,Consolas,monospace;letter-spacing:.15em}
-.modal h2{font-size:clamp(25px,5vw,34px);letter-spacing:.015em}.modal p{line-height:1.85;font-size:13px;color:#b3cbdc}.modal ul{font-size:13px;line-height:1.85;color:#d0e5f4}
-.difficulty{margin:19px 0 0}.difficulty label{font-size:12px;color:#bad4e5}.difficulty select{font-size:13px;background:#112b3f;border-color:#456c80;border-radius:8px}.modal .primary{margin-top:17px;padding:15px}.modal .fineprint{color:#819bac!important;font-size:11px!important}
-.end-summary{grid-template-columns:repeat(3,1fr);gap:8px}.end-summary>div{border-radius:9px;background:#17364b}.end-summary strong{color:#8bf4dc;font-family:ui-monospace,Consolas,monospace}.debrief{background:#102b3e;border-color:#3d687a}
-#toast{position:fixed;bottom:22px;left:50%;transform:translate(-50%,18px);opacity:0;pointer-events:none;max-width:min(550px,calc(100vw - 22px));background:#143246;border:1px solid #4e8c94;color:#dbfff7;padding:13px 18px;border-radius:11px;font-size:12px;font-weight:750;box-shadow:0 17px 55px #000b;z-index:15;transition:opacity .25s,transform .25s;text-align:center;line-height:1.55}
-#toast.show{opacity:1;transform:translate(-50%,0)}#toast.negative{border-color:#e28593;color:#ffdae0;background:#3b2532}
-@media (max-width:1120px){.wrap{padding:18px 17px 32px}.main{grid-template-columns:minmax(0,1.4fr) minmax(310px,.85fr)}.hero{padding:20px}.hero-right{gap:10px}.hero-info{min-width:116px}.p-head{padding-left:16px;padding-right:16px}.goal-card,.detail,.upgrade,.activity,.awards,.howto{padding:17px}}
-@media (max-width:960px){.main{display:flex;flex-direction:column;gap:12px}.left-stack,.right-stack{display:contents}.main>.left-stack>.panel,.main>.right-stack>.panel{width:100%}.left-stack>.panel:nth-child(1){order:1}.right-stack>.panel:nth-child(1){order:2}.left-stack>.panel:nth-child(2){order:3}.right-stack>.panel:nth-child(2){order:4}.right-stack>.panel:nth-child(3){order:5}.left-stack>.panel:nth-child(3){order:6}.right-stack>.panel:nth-child(4){order:7}.map-panel .p-head{flex-direction:row}.award-grid{grid-template-columns:repeat(3,1fr)}}
-@media (max-width:670px){.wrap{padding:14px 10px 30px}.topbar{margin-bottom:13px}.brand-mark{width:45px;height:45px}.brand-mark svg{width:28px;height:28px}.brand{gap:11px}h1{font-size:22px}h1 small{font-size:9px;margin-left:4px}.tagline{font-size:10px}.head-actions{width:100%;justify-content:space-between}.top-pill{flex:1;font-size:9px;min-width:0}.hero{padding:16px;align-items:flex-start;gap:8px}.hero h2{font-size:18px}.hero-desc{font-size:11px;line-height:1.65}.hero-right{padding:0;flex-direction:column;gap:7px}.dial{width:71px;height:71px;padding:5px}.dial-inner strong{font-size:21px}.dial-inner small{font-size:7px}.hero-info{min-width:0;text-align:center}.hero-info small{font-size:8px}.hero-info strong{font-size:10px;margin:4px 0 0;white-space:nowrap}.hero-info span{font-size:9px;white-space:nowrap;margin-top:5px}.pulse-strip{padding:10px 11px}.pulse-label{display:none}.pulse-text{font-size:11px}.pulse-index{font-size:9px}.quicknav{gap:5px}.quicknav a{font-size:11px;padding:9px 12px}.stat-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.stat{min-height:99px;padding:14px 13px}.stat-label{font-size:10px}.stat-value{font-size:23px}.stat-ornament{width:27px;height:27px;right:11px;top:11px;font-size:13px}.stat-detail{font-size:9px}.map-panel .p-head{padding:16px 14px 13px;gap:8px}.map-panel h2{font-size:15px}.map-panel .sub{font-size:11px}.map-btn{display:inline-block;padding:7px;font-size:10px}.map-container{padding:7px 0 0;overflow-x:auto;scrollbar-width:thin}#network{width:700px;min-width:700px;max-height:none;min-height:0;touch-action:pan-x}.map-container.fit-map #network{width:100%;min-width:0}.map-container.fit-map{overflow:visible}.map-legend{padding:10px 13px;gap:10px}.map-legend span{font-size:10px}.map-footer{margin:0 12px;padding:10px 0 13px}.map-caption{font-size:10px}.goal-card,.detail,.upgrade,.activity,.awards,.howto{padding:16px}.award-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.modal{padding:22px}.modal h2{font-size:25px}}
-@media (max-width:370px){.hero-info{display:none}.hero-right{margin-top:14px}.dial{width:65px;height:65px}.stat-value{font-size:21px}.upgrade-item{grid-template-columns:36px minmax(0,1fr) auto;gap:7px;padding:9px 7px}.upgrade-icon{width:36px;height:36px;font-size:16px}.upgrade-button{min-width:55px;padding:8px 6px;font-size:10px}.award{padding:8px 6px}.map-actions{gap:4px}}
-@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important;scroll-behavior:auto!important}}
-
-
-.defense-pips{display:flex;gap:5px;margin-top:14px}.defense-pips i{height:8px;flex:1;border-radius:2px;background:#2b4255;border:1px solid #3b5362}.defense-pips i.filled{background:linear-gradient(90deg,#4baabb,#7ae4d2);border-color:#71d5d0;box-shadow:0 0 8px #48bfc838}
-.empty-awards{padding:14px;color:#9cb8ca;font-size:12px;grid-column:1/-1;text-align:center;border:1px dashed #3f5a70;border-radius:8px}
-@media (max-width:670px){.hero-break{display:none}.map-container.fit-map #network{min-height:0}.node .name{font-size:12px}}
-
-</style>
+<title>CYBER OUTBREAK v0.4 | 病院サイバーリスク・シミュレーション</title>
+<link rel="stylesheet" href="./css/styles.css">
+<link rel="stylesheet" href="./css/drawer.css">
 </head>
 <body>
 <div class="wrap">
 <header class="topbar">
-  <div class="brand"><div class="brand-mark"><svg viewBox="0 0 50 50" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="M25 4l17 10v21L25 46 8 35V14z"/><path d="M25 12l11 6v14l-11 7-11-7V18z" opacity=".55"/><path d="M25 18v16M17 26h16" stroke-width="3"/><circle cx="25" cy="26" r="18" stroke-dasharray="2 5" opacity=".35"/></svg></div><div><div class="brand-micro">SIMULATION / TACTICAL INTERFACE</div><h1>CYBER <span>OUTBREAK</span><small>v0.3</small></h1><div class="tagline">架空病院 × 情報資産 × ターン制ストラテジー</div></div></div>
+  <div class="brand"><div class="brand-mark"><svg viewBox="0 0 50 50" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="M25 4l17 10v21L25 46 8 35V14z"/><path d="M25 12l11 6v14l-11 7-11-7V18z" opacity=".55"/><path d="M25 18v16M17 26h16" stroke-width="3"/><circle cx="25" cy="26" r="18" stroke-dasharray="2 5" opacity=".35"/></svg></div><div><div class="brand-micro">SIMULATION / TACTICAL INTERFACE</div><h1>CYBER <span>OUTBREAK</span><small>v0.4</small></h1><div class="tagline">架空病院 × 情報資産 × ターン制ストラテジー</div></div></div>
   <div class="head-actions"><span class="top-pill"><span class="led"></span> OFFLINE SIMULATION <span class="mono">/ 100% LOCAL</span></span><button type="button" class="small-btn" id="helpBtn">ルール</button><button type="button" class="small-btn" id="restartBtn">最初から</button></div>
 </header>
 
@@ -258,7 +23,8 @@ h1{font-size:26px;font-weight:900;letter-spacing:.045em;line-height:1.1}h1 span{
   <div class="hero-right"><div class="dial" id="alertDial"><div class="dial-inner"><strong id="alertDialNumber">08</strong><small>ALERT</small></div></div><div class="hero-info"><small>DEFENSE STATUS</small><strong id="defenseStage">通常監視</strong><span id="briefCycle">TURN 01 / 12</span></div></div>
 </section>
 <div class="pulse-strip" role="status" aria-live="polite"><span class="pulse-icon">⌁</span><span class="pulse-label">LIVE REPORT</span><span class="pulse-text" id="pulseText">演習の開始を待機中です。</span><span class="pulse-index" id="pulseTurn">T--</span></div>
-<nav class="quicknav" aria-label="ゲーム画面内の移動"><a href="#mapSection"><span class="nav-number">01</span> ネットワーク</a><a href="#inspectorSection"><span class="nav-number">02</span> ノード操作</a><a href="#upgradeSection"><span class="nav-number">03</span> 進化</a><a href="#awardsSection"><span class="nav-number">04</span> 実績</a><a href="#activitySection"><span class="nav-number">05</span> 通信ログ</a></nav>
+<div class="tactical-toolbar" aria-label="戦術コマンド"><span class="tactical-label"><b>TACTICAL CONTROL</b><small>ショップと強化を開く</small></span><div class="tactical-buttons"><button class="tactical-btn" id="openShopBtn" data-panel="shop" type="button" aria-controls="controlDrawer" aria-expanded="false">◈ 戦術ショップ</button><button class="tactical-btn" id="openUpgradeBtn" data-panel="upgrade" type="button" aria-controls="controlDrawer" aria-expanded="false">⬡ 進化・強化</button></div><strong class="tactical-balance" id="shopHeaderPoints">0 IP</strong></div>
+<nav class="quicknav" aria-label="ゲーム画面内の移動"><a href="#mapSection"><span class="nav-number">01</span> ネットワーク</a><a href="#inspectorSection"><span class="nav-number">02</span> ノード操作</a><a href="#awardsSection"><span class="nav-number">03</span> 実績</a><a href="#activitySection"><span class="nav-number">04</span> 通信ログ</a></nav>
 <div class="stat-grid" aria-label="戦況統計">
   <section class="panel stat"><span class="stat-ornament" aria-hidden="true">⌁</span><div class="stat-label">AVAILABLE POINTS / 所持IP</div><div class="stat-value teal" id="pointsVal">0 IP</div><div class="stat-detail" id="incomeHint">アップグレードに使用</div><div class="stat-track"></div></section>
   <section class="panel stat"><span class="stat-ornament" aria-hidden="true">▤</span><div class="stat-label">ACQUIRED / 累計獲得</div><div class="stat-value" id="harvestVal">0 IP</div><div class="stat-detail" id="harvestHint">目標 120 IP</div><div class="stat-track"></div></section>
@@ -285,14 +51,30 @@ h1{font-size:26px;font-weight:900;letter-spacing:.045em;line-height:1.1}h1 span{
   </div>
   <div class="right-stack">
     <section class="panel detail" id="inspectorSection"><div class="section-header"><h2>ノード・インスペクター</h2><span class="section-badge">SELECTED NODE</span></div><div id="detailContent"></div><div class="btn-row"><button class="secondary" type="button" id="endTurnBtn">ターン終了</button><button class="secondary" type="button" id="guideBtn">遊び方</button></div></section>
-    <section class="panel upgrade" id="upgradeSection"><div class="section-header"><h2>進化研究所</h2><span class="section-badge">UPGRADE TREE</span></div><p class="sub">獲得した模擬情報ポイントを使って能力を強化します。各能力は最大Lv.3。</p><div class="upgrade-list" id="upgrades"></div></section>
+    
     <section class="panel awards" id="awardsSection"><div class="awards-heading"><div><h2>アチーブメント</h2><p class="sub">隠し資料と戦略実績を収集。取得状況はこのブラウザだけに保存。</p></div><span class="pill" id="badgeCount">0 / 12</span></div><div class="award-progress"><span id="awardBar"></span></div><div class="award-filters" aria-label="実績表示を切り替える"><button class="filter-btn" data-award-filter="all" aria-pressed="true">すべて</button><button class="filter-btn" data-award-filter="earned" aria-pressed="false">獲得済み</button><button class="filter-btn" data-award-filter="locked" aria-pressed="false">未発見</button></div><div class="award-grid" id="achievementList"></div><button type="button" class="small-btn" id="clearAwardsBtn">実績の記録をリセット</button></section><section class="panel howto"><h2>ゲームの操作</h2><p><b style="color:#eaf4ff">①</b> 緑のノードで模擬データを回収 → <b style="color:#eaf4ff">②</b> 青いノードへ影響を広げる → <b style="color:#eaf4ff">③</b> 継続収入や要求イベントを選択 → <b style="color:#eaf4ff">④</b> 進化に投資 → <b style="color:#eaf4ff">⑤</b> ターン終了。病院側も経路遮断や復旧を実行します。</p><p>防御との関係を学ぶための抽象ゲームです。現実の侵入方法・個人情報・外部通信は含みません。</p></section>
   </div>
 </div>
-<div class="note-footer">CYBER OUTBREAK / TACTICAL CONSOLE v0.3 — EDUCATIONAL FICTION　｜　完全ローカル動作・データ送信なし</div>
+<div class="note-footer">CYBER OUTBREAK / TACTICAL CONSOLE v0.4 — EDUCATIONAL FICTION　｜　完全ローカル動作・データ送信なし</div>
 </div>
+<button class="drawer-backdrop" id="drawerBackdrop" type="button" tabindex="-1" aria-label="パネルを閉じる"></button>
+<aside class="control-drawer" id="controlDrawer" role="dialog" aria-modal="true" aria-labelledby="drawerTitle" aria-hidden="true" inert>
+  <header class="drawer-head"><div><span id="drawerKicker" class="drawer-kicker">TACTICAL SHOP</span><h2 id="drawerTitle">戦術ショップ</h2></div><button class="drawer-close" id="closeDrawerBtn" type="button" aria-label="閉じる">×</button></header>
+  <div class="drawer-balance"><span>AVAILABLE POINTS</span><strong id="shopIpBalance">0 IP</strong></div>
+  <div class="drawer-scroll">
+    <section class="drawer-view" data-panel-view="shop" aria-label="ショップ">
+      <p class="drawer-intro">選択中：<strong id="shopNodeName">外縁ゲート</strong>。購入・行動後はマップに戻ります。</p><div class="drawer-shop-list" id="shopItems"></div>
+      <p class="drawer-note">すべて架空の抽象イベントです。現実の侵入や個人情報の取得方法は扱いません。</p>
+    </section>
+    <section class="drawer-view" data-panel-view="upgrade" aria-label="進化・強化" hidden>
+      <p class="drawer-intro">模擬情報ポイントを使って能力を最大Lv.3まで強化できます。</p><div class="upgrade-list" id="upgrades"></div>
+      <p class="drawer-note">数値はゲーム内だけのもので、現実の安全性や攻撃能力を示しません。</p>
+    </section>
+  </div>
+  <footer class="drawer-foot">● 100% OFFLINE · ターン制のため表示中に時間は進みません</footer>
+</aside>
 <div class="overlay" id="intro" role="dialog" aria-modal="true" aria-labelledby="introTitle">
-  <div class="modal"><div class="modal-symbol">⬡</div><div class="overline">OPERATION / GRID ZERO ・ V0.3</div><h2 id="introTitle">CYBER OUTBREAK</h2>
+  <div class="modal"><div class="modal-symbol">⬡</div><div class="overline">OPERATION / GRID ZERO ・ V0.4</div><h2 id="introTitle">CYBER OUTBREAK</h2>
   <p>架空の医療情報ネットワークに影響を広げるターン制戦略ゲーム。模擬データの回収に加えて、仮想サーバーの継続収入や架空の要求イベントも使える戦略ゲーム。病院側は経路遮断や復旧で対抗します。</p>
   <ul><li>「外縁ゲート」から始め、接続が開いている隣接ノードへ進みます。</li><li>選択済みのノードから模擬データを回収し、継続収入設備や進化に投資します。</li><li>病院側は接続を遮断・復旧できます。警戒度100またはターン超過で敗北。隠し実績も探しましょう。</li></ul>
   <div class="difficulty"><label for="difficulty">ゲーム難易度</label><select id="difficulty"><option value="casual">カジュアル — 初めてでも遊びやすい</option><option value="normal" selected>スタンダード — ほどよい駆け引き</option><option value="hard">チャレンジ — 判断が重要</option></select></div>
@@ -305,241 +87,7 @@ h1{font-size:26px;font-weight:900;letter-spacing:.045em;line-height:1.1}h1 span{
   <div class="debrief"><b>防御の視点から振り返る</b><p id="debriefText">対策の効果を確認しましょう。</p></div>
   <button class="primary" type="button" id="againBtn">もう一度プレイ →</button><p class="fineprint">このスコアはゲーム上のもので、実在する医療機関の安全性の指標ではありません。</p></div>
 </div>
-<script>
-(()=>{
-'use strict';
-const $=id=>document.getElementById(id);
-const SVG_NS='http://www.w3.org/2000/svg';
-const EDGES=[['gate','office'],['gate','shared'],['office','billing'],['office','lab'],['shared','lab'],['shared','image'],['billing','records'],['lab','records'],['image','operations'],['operations','records']];
-const MAP=[
-{id:'gate',name:'外縁ゲート',desc:'演習の開始地点。実際の接続方法を示すものではありません。',x:93,y:205,data:24,security:1,code:'01',server:false},
-{id:'office',name:'事務情報',desc:'事務部門に相当する架空の情報資産群。',x:278,y:93,data:32,security:1,code:'02',server:false},
-{id:'shared',name:'共有サービス',desc:'共同サービスに相当する架空の資産群。継続収入ユニットを配置できます。',x:278,y:319,data:29,security:1,code:'03',server:true},
-{id:'billing',name:'医事会計',desc:'会計に関する架空の情報資産群。',x:471,y:67,data:39,security:2,code:'04',server:true},
-{id:'lab',name:'検査部門',desc:'検査に関する架空の情報資産群。',x:471,y:199,data:40,security:2,code:'05',server:true},
-{id:'image',name:'画像部門',desc:'画像部門に関する架空の情報資産群。',x:471,y:334,data:36,security:2,code:'06',server:true},
-{id:'records',name:'診療記録',desc:'記録を表現した架空ノード。実際の電子カルテとは無関係です。',x:671,y:144,data:56,security:3,code:'07',server:true},
-{id:'operations',name:'運用基盤',desc:'運用を表現した架空ノード。',x:671,y:320,data:45,security:3,code:'08',server:true}
-];
-const RULES={
- casual:{targetIP:85,targetNodes:4,maxTurns:13,startIP:24,startAlert:3,alertFactor:.60},
- normal:{targetIP:120,targetNodes:5,maxTurns:12,startIP:22,startAlert:7,alertFactor:.77},
- hard:{targetIP:155,targetNodes:6,maxTurns:11,startIP:18,startAlert:12,alertFactor:.94}
-};
-const UPGRADES={
- spread:{label:'拡張',icon:'↗',desc:'新しいノードへの進出成功率を高める',costs:[18,32,49]},
- analysis:{label:'解析',icon:'▤',desc:'模擬データ回収量を増やす',costs:[19,32,47]},
- adapt:{label:'適応',icon:'⬡',desc:'警戒度の増加を緩和する',costs:[21,37,53]},
- sustain:{label:'継続',icon:'◷',desc:'継続収入ユニットの毎ターン収入を増やす',costs:[25,40,58]}
-};
-const ARTIFACTS=[
-{id:'memo',name:'匿名化の覚書',desc:'「模擬データと実データの境界」についての記録。'},
-{id:'drill',name:'障害対応訓練記録',desc:'復旧連携の演習を振り返る資料。'},
-{id:'backup',name:'復旧計画の断片',desc:'バックアップだけでは十分でないことを示す資料。'},
-{id:'training',name:'職員教育の記録',desc:'職員からの報告が早期検知につながった記録。'},
-{id:'mapping',name:'構成管理ノート',desc:'資産の把握と優先順位付けに関するメモ。'},
-{id:'response',name:'初動連絡の手引き',desc:'担当部署と責任分担の重要性を示す資料。'}
-];
-const MILESTONES=[
-{id:'first',name:'第一歩',desc:'新しいノードに進出した',icon:'◇'},
-{id:'wealth',name:'データの山',desc:'模擬データ回収が累計50 IPに到達',icon:'▤'},
-{id:'stream',name:'定期収入',desc:'継続収入ユニットでポイントを獲得',icon:'◷'},
-{id:'demand',name:'交渉の結果',desc:'要求イベントでポイントを獲得',icon:'!'},
-{id:'reconnect',name:'分断を越えて',desc:'ネットワーク分離の解消を確認した',icon:'⌁'},
-{id:'victory',name:'ミッション達成',desc:'いずれかの難易度で勝利',icon:'★'}
-];
-const ALL_AWARDS=[...MILESTONES,...ARTIFACTS.map(a=>({...a,icon:'▣'}))];
-const STORAGE_KEY='cyber-outbreak:achievements:v02';
-let state=null,hasBegun=false;let awardFilter='all',lastToastKey='',toastTimer=null;
-let earned=readEarned();
-function readEarned(){try{const value=JSON.parse(localStorage.getItem(STORAGE_KEY)||'[]');return new Set(Array.isArray(value)?value.filter(v=>ALL_AWARDS.some(a=>a.id===v)):[])}catch(_){return new Set()}}
-function persistEarned(){try{localStorage.setItem(STORAGE_KEY,JSON.stringify([...earned]))}catch(_){/* local data may be disabled */}}
-function earn(id){if(!ALL_AWARDS.some(a=>a.id===id)||earned.has(id))return;earned.add(id);persistEarned();const a=ALL_AWARDS.find(a=>a.id===id);log('実績解除：「'+a.name+'」','positive')}
-function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
-function makeState(difficulty='normal'){
- const rule=RULES[difficulty]||RULES.normal;const artifacts=shuffle(ARTIFACTS.map(a=>a.id)).slice(0,3),targets=shuffle(MAP.filter(n=>n.id!=='gate').map(n=>n.id)).slice(0,3);
- const artifactsOnNodes=Object.fromEntries(targets.map((id,i)=>[id,artifacts[i]]));
- return {difficulty,rule,turn:1,ap:3,points:rule.startIP,total:0,harvested:0,passive:0,demandIncome:0,alert:rule.startAlert,selected:'gate',up:{spread:0,analysis:0,adapt:0,sustain:0},
- nodes:MAP.map(n=>({...n,left:n.data,owned:n.id==='gate',bonusSecurity:0,lockedUntil:0,unitTurns:0,demanded:false,harvestOnce:false,artifact:artifactsOnNodes[n.id]||null})),
- edges:EDGES.map(([a,b])=>({a,b,blockedUntil:0})),log:[],ended:false,started:true,demandAttempts:0,unitsEarned:0}
-}
-function node(id){return state.nodes.find(n=>n.id===id)}
-function edge(a,b){return state.edges.find(e=>(e.a===a&&e.b===b)||(e.a===b&&e.b===a))}
-function openLink(a,b){const e=edge(a,b);return !!e&&e.blockedUntil<state.turn}
-function connected(){const seen=new Set(['gate']),queue=['gate'];while(queue.length){const id=queue.shift();for(const e of state.edges){const next=e.a===id?e.b:e.b===id?e.a:null;if(!next||seen.has(next)||!openLink(id,next))continue;const n=node(next);if(n.owned){seen.add(next);queue.push(next)}}}return seen}
-function isActive(n){return n.owned&&connected().has(n.id)}
-function reachable(n){const group=connected();return !n.owned&&state.edges.some(e=>e.blockedUntil<state.turn&&((e.a===n.id&&group.has(e.b))||(e.b===n.id&&group.has(e.a))))}
-function visible(n){return n.owned||reachable(n)||state.edges.some(e=>(e.a===n.id&&node(e.b).owned)||(e.b===n.id&&node(e.a).owned))}
-function activeCount(){return connected().size}
-function totalUnits(){return state.nodes.filter(n=>n.unitTurns>0).length}
-function log(msg,kind='info'){state.log.unshift({turn:state.turn,msg,kind});state.log=state.log.slice(0,15)}
-function applyAlert(value){state.alert=Math.max(0,Math.min(100,state.alert+Math.max(1,Math.round(value*state.rule.alertFactor)-state.up.adapt)))}
-function setText(id,text){const el=$(id);if(el)el.textContent=text}
-function render(){if(!state)return;
- setText('pointsVal',state.points+' IP');setText('harvestVal',state.total+' IP');setText('ownedVal',activeCount()+' / '+state.nodes.length);setText('turnVal',state.turn+' / '+state.rule.maxTurns);
- setText('incomeHint','継続収入 '+state.nodes.filter(n=>n.unitTurns>0&&isActive(n)).length+' 台稼働');setText('apHint','残り行動力 '+('● '.repeat(state.ap)||'なし')+'('+state.ap+'/3)');
- setText('harvestHint','目標 '+state.rule.targetIP+' IP（全収入）');setText('ownedHint','接続中の目標 '+state.rule.targetNodes+' ノード');
- setText('goalIPText',state.total+' / '+state.rule.targetIP+' IP');setText('goalNodeText',activeCount()+' / '+state.rule.targetNodes);setText('alertText',state.alert+' / 100');
- $('goalIPBar').style.width=Math.min(100,state.total/state.rule.targetIP*100)+'%';$('goalNodeBar').style.width=Math.min(100,activeCount()/state.rule.targetNodes*100)+'%';$('alertBar').style.width=state.alert+'%';
- setText('alertMessage',state.alert>=80?'病院側が重点対応中。継続収入が停止される可能性も高まっています。':state.alert>=55?'警戒度上昇。ネットワーク分離・復旧に注意。':state.alert>=25?'病院側が兆候を検知し、経路遮断や防御強化を検討しています。':'病院側は通常監視中。警戒度100で終了します。');
- $('statusChips').innerHTML=`<span class="status-chip">遮断経路 ${state.edges.filter(e=>e.blockedUntil>=state.turn).length}</span><span class="status-chip">継続ユニット ${totalUnits()}/2</span><span class="status-chip">回収 ${state.harvested} IP</span><span class="status-chip">継続収入 ${state.passive} IP</span><span class="status-chip ${state.demandAttempts?'alert':''}">要求イベント ${state.demandIncome} IP</span>`;
- setText('mapStatus',state.ended?'SIMULATION COMPLETE':'ROUND '+String(state.turn).padStart(2,'0')+' / AP '+state.ap);
- updateHUD();
- renderMap();renderDetail();renderUpgrades();renderFeed();renderAwards();$('endTurnBtn').disabled=state.ended;
-}
-function svgEl(tag,attrs,parent,text){const el=document.createElementNS(SVG_NS,tag);Object.entries(attrs).forEach(([a,v])=>el.setAttribute(a,v));if(text!==undefined)el.textContent=text;(parent||$('network')).append(el);return el}
-
-function updateHUD(){
- const lvl=state.alert>=80?'最重要警戒':state.alert>=55?'重点対応中':state.alert>=25?'監視強化':'通常監視';
- setText('alertDialNumber',String(state.alert).padStart(2,'0'));
- const dial=$('alertDial');dial.style.setProperty('--dial-deg',(state.alert*3.6)+'deg');dial.style.setProperty('--dial-color',state.alert>=70?'#ff8f9f':state.alert>=35?'#fbd181':'#70ead4');
- setText('defenseStage',lvl);setText('briefCycle','TURN '+String(state.turn).padStart(2,'0')+' / '+String(state.rule.maxTurns).padStart(2,'0'));
- const cuts=state.edges.filter(e=>e.blockedUntil>=state.turn).length;
- setText('mapLinkCount',String(state.edges.length-cuts).padStart(2,'0')+' / '+state.edges.length+' ACTIVE');
- setText('mapMode','NODES '+activeCount()+'/'+state.nodes.length+'  ·  CUT '+cuts);
- const latest=state.log[0];if(latest){setText('pulseText',latest.msg);setText('pulseTurn','T'+String(latest.turn).padStart(2,'0'));
-  const key=state.turn+':'+latest.msg+':'+state.log.length;
-  if(lastToastKey!==key){lastToastKey=key;if(hasBegun&&latest.kind!=='info'&&!(state.ended)){
-    const toast=$('toast');toast.textContent=latest.msg;toast.className=latest.kind==='negative'?'show negative':'show';
-    if(toastTimer)clearTimeout(toastTimer);toastTimer=setTimeout(()=>{toast.className=''},2600);
-   }}
- }
-}
-function nodeGraphic(g,n,visibleOnMap){
- const x=n.x-48,y=n.y-3;
- svgEl('rect',{x:x-15,y:y-16,width:30,height:30,rx:8,class:'node-icon-box'},g);
- if(!visibleOnMap){svgEl('path',{d:`M${x-4} ${y-4}q4 -6 8 0q2 3 -2 6l-2 2m0 5v1`,class:'node-glyph'},g);return;}
- const p={
-  gate:`M${x-7} ${y-8}L${x+8} ${y}L${x-7} ${y+8}z`,
-  office:`M${x-7} ${y-8}h14v16h-14z M${x-3} ${y-4}h6 M${x-3} ${y}h6 M${x-3} ${y+4}h6`,
-  shared:`M${x-7} ${y-4}h14v9h-14z M${x-4} ${y-8}h8 M${x-4} ${y+9}h8`,
-  billing:`M${x-7} ${y-9}h14v18h-14z M${x-4} ${y-4}h8 M${x-4} ${y}h8 M${x-4} ${y+4}h5`,
-  lab:`M${x-2} ${y-9}v8l-6 9h16l-6 -9v-8 M${x-4} ${y-9}h8 M${x-4} ${y+4}h8`,
-  image:`M${x-9} ${y-6}h18v13h-18z M${x-6} ${y+4}l4 -5 3 3 3 -4 3 6`,
-  records:`M${x-7} ${y-9}h11l4 4v14h-15z M${x+4} ${y-9}v4h4 M${x-4} ${y+1}h8`,
-  operations:`M${x} ${y-10}v4 M${x} ${y+6}v4 M${x-10} ${y}h4 M${x+6} ${y}h4 M${x-6} ${y-6}l3 3 M${x+3} ${y+3}l3 3 M${x+6} ${y-6}l-3 3 M${x-3} ${y+3}l-3 3 M${x} ${y-6}a6 6 0 1 0 0 12a6 6 0 1 0 0 -12` }[n.id];
- svgEl('path',{d:p,class:'node-glyph'},g);
-}
-
-function renderMap(){
- const svg=$('network');svg.innerHTML='';
- const defs=svgEl('defs',{},svg);
- const grad=svgEl('radialGradient',{id:'ambient-glow',cx:'51%',cy:'45%',r:'62%'},defs);
- svgEl('stop',{offset:'0%','stop-color':'#164359','stop-opacity':'.44'},grad);
- svgEl('stop',{offset:'100%','stop-color':'#07192b','stop-opacity':'0'},grad);
- svgEl('rect',{width:780,height:410,rx:10,class:'map-bg'},svg);
- svgEl('rect',{width:780,height:410,rx:10,fill:'url(#ambient-glow)'},svg);
- for(let x=17;x<780;x+=28)svgEl('line',{x1:x,y1:0,x2:x,y2:410,class:'grid-pattern'},svg);
- for(let y=17;y<410;y+=28)svgEl('line',{x1:0,y1:y,x2:780,y2:y,class:'grid-pattern'},svg);
- [74,135,198].forEach(r=>svgEl('circle',{cx:412,cy:211,r,fill:'none',stroke:'#30647b','stroke-opacity':'.19','stroke-width':1},svg));
- svgEl('path',{d:'M16 38h25 M16 38v-20 M740 38h24 M764 38v-20 M16 372h25 M16 372v21 M740 372h24 M764 372v21',stroke:'#5e93a8','stroke-width':'1.4',fill:'none',opacity:'.58'},svg);
- svgEl('text',{x:26,y:26,fill:'#648ca2','font-size':10,'font-family':'monospace','letter-spacing':'1.7'},svg,'TOPOLOGY // FICTIONAL SYSTEM');
- svgEl('text',{x:759,y:398,fill:'#648ca2','font-size':10,'text-anchor':'end','font-family':'monospace'},svg,'NODES 08 / LINK 10');
- for(const e of state.edges){const a=node(e.a),b=node(e.b),blocked=e.blockedUntil>=state.turn,live=isActive(a)&&isActive(b);
-  if(blocked)svgEl('line',{x1:a.x,y1:a.y,x2:b.x,y2:b.y,class:'edge cut-halo'},svg);
-  svgEl('line',{x1:a.x,y1:a.y,x2:b.x,y2:b.y,class:'edge '+(blocked?'cut':live?'live':!visible(a)||!visible(b)?'unknown':'')},svg);
-  if(blocked){const cx=(a.x+b.x)/2,cy=(a.y+b.y)/2;svgEl('circle',{cx,cy,r:12,class:'edge-break'},svg);svgEl('text',{x:cx,y:cy+5,class:'edge-break-text'},svg,'×')}
- }
- for(const n of state.nodes){const isVisible=visible(n),active=isActive(n),isolated=n.owned&&!active,protectedNode=n.lockedUntil>=state.turn&&!n.owned;
-  const cls='node '+(!isVisible?'is-hidden':n.owned?'is-owned':'is-reachable')+(isolated?' is-isolated':'')+(n.id===state.selected?' is-selected':'')+(protectedNode?' is-locked':'')+(n.unitTurns>0?' is-generator':'');
-  const g=svgEl('g',{class:cls,'data-node':n.id,role:'button',tabindex:0,'aria-label':(isVisible?n.name:'未発見ノード')+'を選択'},svg);
-  svgEl('circle',{class:'pulse',cx:n.x,cy:n.y,r:52},g);
-  svgEl('rect',{class:'selection',x:n.x-70,y:n.y-43,width:140,height:85,rx:13},g);
-  svgEl('rect',{class:'tile',x:n.x-65,y:n.y-38,width:130,height:75,rx:11},g);
-  svgEl('rect',{class:'node-indicator',x:n.x-60,y:n.y-32,width:3,height:64,rx:2},g);
-  nodeGraphic(g,n,isVisible);
-  const txt=(value,x,y,cls)=>svgEl('text',{class:cls,x,y,'text-anchor':'start'},g,value);
-  txt(isVisible?'SYS / '+n.code:'SYS / --',n.x-20,n.y-20,'number');
-  txt(isVisible?n.name:'未確認',n.x-21,n.y+2,'name');
-  txt(!isVisible?'LOCKED':isolated?'CONNECTION LOST':n.unitTurns>0?'収入 '+n.unitTurns+' T':n.owned?'ACTIVE':protectedNode?'PROTECTED':reachable(n)?'AVAILABLE':'ISOLATED',n.x-21,n.y+21,'info');
-  if(n.unitTurns>0)svgEl('text',{x:n.x+49,y:n.y-20,class:'gen-marker','text-anchor':'middle'},g,'●');
- }
-}
-function renderDetail(){const n=node(state.selected),active=isActive(n),disconnected=n.owned&&!active;
- const status=n.owned?(active?'ACTIVE / 影響中':'ISOLATED / 分離中'):reachable(n)?'AVAILABLE / 進出可能':visible(n)?'BLOCKED / 保護中':'UNKNOWN / 未発見';
- const desc=visible(n)?n.desc:'まだ探索できないノードです。接続経路があるノードから探索を進めてください。';
- const defense=visible(n)?n.security+n.bonusSecurity:0;
- const data=visible(n)?n.left+' IP':'不明';
- const canCollect=n.owned&&active&&n.left>0&&state.ap>0&&!state.ended;
- const canExpand=!n.owned&&reachable(n)&&n.lockedUntil<state.turn&&state.ap>0&&!state.ended;
- const canInstall=n.owned&&active&&n.server&&n.unitTurns===0&&totalUnits()<2&&state.points>=16&&state.ap>0&&!state.ended;
- const canDemand=n.owned&&active&&!n.demanded&&n.data-n.left>=10&&state.ap>0&&!state.ended;
- const primary=n.owned?(n.left>0?'▤  模擬データ回収  /  1 AP':'模擬データ回収済み'):!visible(n)?'探索範囲外':n.lockedUntil>=state.turn?'一時保護中':!reachable(n)?'経路遮断中':'↗  ノードへ進出  /  1 AP';
- const gems=Array.from({length:5},(_,i)=>'<i class="'+(i<defense?'filled':'')+'"></i>').join('');
- $('detailContent').innerHTML=`<div class="detail-title"><div class="detail-icon">${visible(n)?n.code:'??'}</div><div><div class="detail-status">${status}</div><div class="detail-name">${visible(n)?n.name:'未確認ノード'}</div></div></div>
- <p class="description">${desc}</p>
- <div class="kv"><div class="kv-item"><small>DEFENSE / 防御強度</small><div class="defense-pips" aria-label="防御強度 ${defense} / 5">${gems}</div></div><div class="kv-item"><small>SIMULATED DATA / 残量</small><strong>${data}</strong></div></div>
- <div class="detail-note">${disconnected?'病院側が経路を分離中。接続が戻るまで行動・継続収入が停止します。':n.owned&&n.unitTurns>0?'継続収入ユニット設置中。残り '+n.unitTurns+' ターン。':n.owned?'模擬データを回収するか、継続収入・要求イベントを選択できます。':'進出は抽象的な成功・失敗判定で処理します。'}</div>
- <div class="action-stack"><button class="primary" id="nodeAction" type="button" ${canCollect||canExpand?'':'disabled'}>${primary}</button>
- <button class="secondary amber-button" id="installBtn" type="button" ${canInstall?'':'disabled'}>◷  継続収入ユニット設置 <span style="opacity:.7">16 IP / 1 AP</span></button><div class="action-sub">3ターン継続。接続中だけ収入が入り、最大2台まで設置可能。</div>
- <button class="secondary danger-button" id="demandBtn" type="button" ${canDemand?'':'disabled'}>◇  要求イベントに挑戦 <span style="opacity:.7">1 AP</span></button><div class="action-sub">回収10 IP以上で開放。高報酬の可能性がある一方、警戒度が上昇します。</div></div>`;
- $('nodeAction').addEventListener('click',()=>n.owned?collect(n.id):expand(n.id));$('installBtn').addEventListener('click',()=>install(n.id));$('demandBtn').addEventListener('click',()=>demand(n.id));
-}
-function renderUpgrades(){$('upgrades').innerHTML=Object.entries(UPGRADES).map(([key,u])=>{const lv=state.up[key],cost=u.costs[lv],ticks=Array.from({length:3},(_,i)=>'<span class="'+(lv>i?'on':'')+'"></span>').join('');return `<div class="upgrade-item"><div class="upgrade-icon" aria-hidden="true">${u.icon}</div><div><div class="upgrade-name">${u.label} <span class="level">LV ${lv} / 3</span></div><div class="upgrade-description">${u.desc}</div><div class="upgrade-ticks">${ticks}</div></div><button class="upgrade-button" data-upgrade="${key}" ${lv>=3||state.points<cost||state.ended?'disabled':''}>${lv>=3?'MAX':cost+' IP'}</button></div>`}).join('');$('upgrades').querySelectorAll('[data-upgrade]').forEach(b=>b.addEventListener('click',()=>buy(b.dataset.upgrade)))}
-function renderFeed(){$('feed').innerHTML=state.log.map(e=>`<div class="feed-item ${e.kind}"><span class="feed-turn">T${String(e.turn).padStart(2,'0')}</span><span>${e.msg}</span></div>`).join('')}
-function renderAwards(){setText('badgeCount',earned.size+' / '+ALL_AWARDS.length);$('awardBar').style.width=100*earned.size/ALL_AWARDS.length+'%';const list=ALL_AWARDS.filter(a=>awardFilter==='all'||(awardFilter==='earned'?earned.has(a.id):!earned.has(a.id)));$('achievementList').innerHTML=list.length?list.map(a=>{const yes=earned.has(a.id);return `<div class="award ${yes?'obtained':''}"><div class="medal" aria-hidden="true">${yes?a.icon:'?'}</div><div><strong>${yes?a.name:'??? 未発見'}</strong><small>${yes?a.desc:'条件を満たすと解除'}</small></div></div>`}).join(''):'<div class="empty-awards">この条件の実績はありません。</div>'}
-
-function collect(id){if(!state||state.ended||state.ap<1)return;const n=node(id);if(!n||!isActive(n)||n.left<=0)return;
- const amount=Math.min(n.left,11+state.up.analysis*5);n.left-=amount;state.points+=amount;state.total+=amount;state.harvested+=amount;state.ap--;applyAlert(2);log(n.name+'から模擬データ '+amount+' IPを回収。','positive');
- if(!n.harvestOnce){n.harvestOnce=true;if(n.artifact){const art=ARTIFACTS.find(a=>a.id===n.artifact);earn(art.id);log('隠し記録を発見：「'+art.name+'」','positive')}}
- if(state.harvested>=50)earn('wealth');check();render()}
-function expand(id){if(!state||state.ended||state.ap<1)return;const n=node(id);if(!n||n.owned||!reachable(n)||n.lockedUntil>=state.turn)return;
- const chance=Math.min(96,Math.max(39,91-8*(n.security+n.bonusSecurity)+state.up.spread*10-Math.floor(state.alert/29)*2-(state.difficulty==='hard'?6:0)));
- state.ap--;if(Math.random()*100<chance){n.owned=true;applyAlert(3);log(n.name+'に影響が拡大しました（架空判定）。','positive');earn('first')}else{applyAlert(5);log(n.name+'への進出が失敗。病院側の防御が機能しました。','negative')}
- check();render()}
-function install(id){if(!state||state.ended||state.ap<1)return;const n=node(id);if(!n||!isActive(n)||!n.server||n.unitTurns||totalUnits()>=2||state.points<16)return;
- state.ap--;state.points-=16;n.unitTurns=3;applyAlert(3);log(n.name+'に継続収入ユニットを設置（残り3ターン）。','positive');check();render()}
-function demand(id){if(!state||state.ended||state.ap<1)return;const n=node(id);if(!n||!isActive(n)||n.demanded||n.data-n.left<10)return;
- n.demanded=true;state.ap--;state.demandAttempts++;
- const chance=Math.max(.25,.70-state.alert/260);const ok=Math.random()<chance;applyAlert(ok?13:17);
- if(ok){const amount=19+Math.min(n.security,3)*6;state.points+=amount;state.total+=amount;state.demandIncome+=amount;log('架空の要求イベント：交渉が成立し '+amount+' IPを獲得。','positive');earn('demand')}else{log('架空の要求イベント：病院側は要求に応じず、警戒が高まりました。','negative')}
- check();render()}
-function buy(key){if(!state||state.ended||!UPGRADES[key])return;const u=UPGRADES[key],lv=state.up[key],cost=u.costs[lv];if(lv>=3||state.points<cost)return;state.points-=cost;state.up[key]++;log(u.label+'をLv.'+state.up[key]+'に強化（-'+cost+' IP）。','positive');render()}
-function hospitalTurn(){const t=state.turn;const variant=t%4;
- if(variant===1){isolateRandom();}
- else if(variant===2){fortify();}
- else if(variant===3){applyAlert(3);log('病院側：職員報告を受け、監視・検知態勢を強化。','negative')}
- else{recover();}
- if(state.alert>65&&Math.random()<.28)recover();
- applyAlert(1);
-}
-function isolateRandom(){const options=state.edges.filter(e=>e.blockedUntil<state.turn&&((node(e.a).owned&&node(e.b).owned)||(node(e.a).owned&&!node(e.b).owned)||(node(e.b).owned&&!node(e.a).owned)));
- if(!options.length){fortify();return}
- const owned=options.filter(e=>node(e.a).owned&&node(e.b).owned);const pool=owned.length&&Math.random()<.65?owned:options;const e=pool[Math.floor(Math.random()*pool.length)];
- e.blockedUntil=state.turn+1+(Math.random()<.4?1:0);log('病院側：'+node(e.a).name+' ⇄ '+node(e.b).name+'の接続を分離（経路遮断）。','negative')}
-function fortify(){const options=state.nodes.filter(n=>!n.owned&&visible(n));if(!options.length){applyAlert(4);log('病院側：資産点検と防御の見直しを実施。','negative');return}
- const n=options[Math.floor(Math.random()*options.length)];n.bonusSecurity=Math.min(2,n.bonusSecurity+1);log('病院側：'+n.name+'の防御を強化。','negative')}
-function recover(){const occupied=state.nodes.filter(n=>n.owned&&n.id!=='gate');const unitNodes=occupied.filter(n=>n.unitTurns>0);const choices=unitNodes.length&&Math.random()<.65?unitNodes:occupied;
- if(choices.length&&state.alert>=45&&Math.random()<.45){const n=choices[Math.floor(Math.random()*choices.length)];n.owned=false;n.unitTurns=0;n.lockedUntil=state.turn+1;log('病院側：'+n.name+'を復旧し、継続収入があれば停止。','negative')}else{applyAlert(4);log('病院側：復旧手順と連絡体制を再確認。','negative')}
-}
-function payGenerators(){for(const n of state.nodes){if(n.unitTurns<=0)continue;
- if(isActive(n)){const amount=10+4*state.up.sustain;state.points+=amount;state.total+=amount;state.passive+=amount;state.unitsEarned+=amount;n.unitTurns--;log('継続収入：'+n.name+'から '+amount+' IP。残り '+n.unitTurns+' ターン。','positive');earn('stream');if(n.unitTurns===0)log(n.name+'の継続収入ユニットは期限終了。','info')}
- else{log('継続収入：'+n.name+'は経路分離中のため停止。','negative')}
-}}
-function restoreRoutes(){for(const e of state.edges){if(e.blockedUntil===state.turn-1){log('病院側：'+node(e.a).name+' ⇄ '+node(e.b).name+'の接続を復旧。','info');earn('reconnect')}}}
-function endTurn(){if(!state||state.ended)return;hospitalTurn();if(state.alert>=100){end(false,'病院側の封じ込めが完了しました。');return}
- if(state.turn>=state.rule.maxTurns){end(false,'制限ターンに達しました。');return}
- state.turn++;state.ap=3;restoreRoutes();payGenerators();log('新しいターンが始まりました。','info');check();render();}
-function check(){if(!state||state.ended)return;if(state.total>=state.rule.targetIP&&activeCount()>=state.rule.targetNodes)end(true,'仮想情報ポイントと接続中のノード目標を達成しました。');else if(state.alert>=100)end(false,'病院側の封じ込めが完了しました。')}
-function end(won,reason){if(state.ended)return;state.ended=true;if(won)earn('victory');render();setText('resultIcon',won?'★':'⬡');setText('resultLabel',won?'MISSION COMPLETE':'MISSION ENDED');setText('resultTitle',won?'ミッション達成！':'病院側の防御成功');setText('resultLead',reason+(won?' 次は隠し記録の収集や別の戦略に挑戦できます。':' 行動順序と投資先を調整して再挑戦できます。'));
- setText('resultData',state.total);setText('resultNodes',activeCount());setText('resultTurns',state.turn);
- setText('debriefText','病院側のネットワーク分離は接続関係を断ち、継続収入を停止させました。復旧は影響ノードの状態を戻します。情報管理・監視・BCPを組み合わせた対策が重要です。本ゲームは現実のリスクを数値化したものではありません。');$('result').hidden=false;
-}
-function selectNode(id){if(!state||!node(id))return;state.selected=id;renderMap();renderDetail()}
-function startGame(){const d=$('difficulty').value;hasBegun=true;state=makeState(d);log('架空の病院シミュレーションを開始しました。');log('経路遮断・継続収入・要求イベントと隠し記録を利用できます。');$('intro').hidden=true;$('result').hidden=true;render()}
-function showHelp(){$('intro').hidden=false;$('continueBtn').hidden=!(hasBegun&&state&&!state.ended);$('startBtn').textContent=hasBegun&&!state.ended?'新しいゲームを開始 →':'ゲーム開始 →'}
-$('network').addEventListener('click',e=>{const g=e.target.closest('[data-node]');if(g)selectNode(g.dataset.node)});
-$('network').addEventListener('keydown',e=>{if((e.key==='Enter'||e.key===' ')&&e.target.closest('[data-node]')){e.preventDefault();selectNode(e.target.closest('[data-node]').dataset.node)}});
-$('startBtn').addEventListener('click',startGame);$('continueBtn').addEventListener('click',()=>{$('intro').hidden=true});$('endTurnBtn').addEventListener('click',endTurn);
-$('againBtn').addEventListener('click',startGame);$('restartBtn').addEventListener('click',()=>{if(state&&!state.ended&&!confirm('現在のゲームを最初からやり直しますか？'))return;showHelp()});$('helpBtn').addEventListener('click',showHelp);$('guideBtn').addEventListener('click',showHelp);
-$('fitMapBtn').addEventListener('click',()=>{const vp=$('mapViewport');const isFit=vp.classList.toggle('fit-map');$('fitMapBtn').setAttribute('aria-pressed',String(isFit));$('fitMapBtn').textContent=isFit?'拡大して見る ↗':'全体表示 ↗';});
- document.querySelectorAll('[data-award-filter]').forEach(btn=>btn.addEventListener('click',()=>{awardFilter=btn.dataset.awardFilter;document.querySelectorAll('[data-award-filter]').forEach(b=>b.setAttribute('aria-pressed',String(b===btn)));renderAwards()}));
- $('clearAwardsBtn').addEventListener('click',()=>{if(!confirm('このブラウザの実績記録をリセットしますか？'))return;earned=new Set();persistEarned();renderAwards()});
- state=makeState('normal');log('ゲーム開始ボタンを押すとプレイできます。');render();
- // デバッグ用。テストから架空の状態のみを確認します。
- window.CyberOutbreakDebug={getState:()=>JSON.parse(JSON.stringify(state)),selectNode,collect,expand,buy,install,demand,endTurn,startGame,earned:()=>[...earned]};
-})();
-
-</script>
+<script src="./js/game-data.js" defer></script>
+<script src="./js/app.js" defer></script>
 </body>
 </html>
