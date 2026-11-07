@@ -17,6 +17,13 @@
 <header class="topbar">
   <div class="brand"><div class="brand-mark"><img src="./favicon.ico?v=0711" width="52" height="52" alt="" decoding="async"></div><div><div class="brand-micro">SIMULATION / TACTICAL INTERFACE</div><h1>CYBER <span>OUTBREAK</span><small>v0.7.1</small></h1><div class="tagline">架空病院 × 情報資産 × ターン制ストラテジー</div></div></div>
   <div class="head-actions"><span class="top-pill"><span class="led"></span> OFFLINE SIMULATION <span class="mono">/ 100% LOCAL</span></span><button type="button" class="small-btn" id="helpBtn">ルール</button><button type="button" class="small-btn" id="restartBtn">最初から</button></div>
+<a
+  class="small-btn feedback-top-link"
+  href="https://github.com/truamagic/Cyber-Outbreak-Game/issues/new/choose"
+  target="_blank"
+  rel="noopener noreferrer">
+  💬 ご意見
+</a>
 </header>
 
 <section class="hero" aria-label="ミッション状況">
@@ -129,7 +136,16 @@
   <p>架空の医療情報ネットワークに影響を広げるターン制戦略ゲーム。模擬データの回収に加えて、仮想サーバーの継続収入や架空の要求イベントも使える戦略ゲーム。病院側は経路遮断や復旧で対抗します。</p>
   <ul><li>「外縁ゲート」から始め、接続が開いている隣接ノードへ進みます。</li><li>選択済みのノードから模擬データを回収し、継続収入設備や進化に投資します。</li><li>病院側は接続を遮断・復旧できます。警戒度100またはターン超過で敗北。隠し実績も探しましょう。</li></ul>
   <div class="difficulty"><label for="difficulty">ゲーム難易度</label><select id="difficulty"><option value="casual">カジュアル — 初めてでも遊びやすい</option><option value="normal" selected>スタンダード — ほどよい駆け引き</option><option value="hard">チャレンジ — 判断が重要</option></select></div>
-  <div class="difficulty"><label for="hospitalProfile">病院の管理体制（すべて架空）</label><select id="hospitalProfile"><option value="A">A：高度管理 — 好機はまれ</option><option value="B" selected>B：標準管理 — 部門差あり</option><option value="C">C：改善途上 — 好機は多め</option><option value="D">D：管理が不十分 — 好機は多い</option></select></div><p class="meta-intro" id="metaIntro">研究ポイント：0 RP ／ 永続研究は次回から反映</p><div class="launch-actions"><button class="secondary tutorial-launch" id="tutorialStartBtn" type="button">初心者向けチュートリアル</button><button class="primary" id="startBtn" type="button">ゲーム開始 →</button></div><button class="secondary" id="continueBtn" type="button" hidden style="margin-top:9px">現在のゲームに戻る</button><p class="fineprint">現実の侵入経路・手順は扱いません。病院や患者に関する情報は全て架空です。</p></div>
+  <div class="difficulty"><label for="hospitalProfile">病院の管理体制（すべて架空）</label><select id="hospitalProfile"><option value="A">A：高度管理 — 好機はまれ</option><option value="B" selected>B：標準管理 — 部門差あり</option><option value="C">C：改善途上 — 好機は多め</option><option value="D">D：管理が不十分 — 好機は多い</option></select></div><p class="meta-intro" id="metaIntro">研究ポイント：0 RP ／ 永続研究は次回から反映</p><div class="launch-actions"><button class="secondary tutorial-launch" id="tutorialStartBtn" type="button">初心者向けチュートリアル</button><button class="primary" id="startBtn" type="button">ゲーム開始 →</button></div>
+    
+<a
+  class="small-btn feedback-intro-link"
+  href="https://github.com/truamagic/Cyber-Outbreak-Game/issues/new/choose"
+  target="_blank"
+  rel="noopener noreferrer">
+  💬 不具合報告・ご意見（GitHub）
+</a>
+<button class="secondary" id="continueBtn" type="button" hidden style="margin-top:9px">現在のゲームに戻る</button><p class="fineprint">現実の侵入経路・手順は扱いません。病院や患者に関する情報は全て架空です。</p></div>
 </div>
 <div id="toast" role="status" aria-live="polite"></div>
 <div class="overlay" id="result" role="dialog" aria-modal="true" aria-labelledby="resultTitle" hidden>
