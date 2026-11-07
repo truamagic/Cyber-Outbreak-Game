@@ -4,15 +4,16 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#0a1522">
-<title>CYBER OUTBREAK v0.5 | 病院サイバーリスク・シミュレーション</title>
+<title>CYBER OUTBREAK v0.6 | 病院サイバーリスク・シミュレーション</title>
 <link rel="stylesheet" href="./css/styles.css">
 <link rel="stylesheet" href="./css/drawer.css">
 <link rel="stylesheet" href="./css/mobile.css">
+<link rel="stylesheet" href="./css/tutorial.css">
 </head>
 <body>
 <div class="wrap">
 <header class="topbar">
-  <div class="brand"><div class="brand-mark"><svg viewBox="0 0 50 50" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="M25 4l17 10v21L25 46 8 35V14z"/><path d="M25 12l11 6v14l-11 7-11-7V18z" opacity=".55"/><path d="M25 18v16M17 26h16" stroke-width="3"/><circle cx="25" cy="26" r="18" stroke-dasharray="2 5" opacity=".35"/></svg></div><div><div class="brand-micro">SIMULATION / TACTICAL INTERFACE</div><h1>CYBER <span>OUTBREAK</span><small>v0.5</small></h1><div class="tagline">架空病院 × 情報資産 × ターン制ストラテジー</div></div></div>
+  <div class="brand"><div class="brand-mark"><svg viewBox="0 0 50 50" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="M25 4l17 10v21L25 46 8 35V14z"/><path d="M25 12l11 6v14l-11 7-11-7V18z" opacity=".55"/><path d="M25 18v16M17 26h16" stroke-width="3"/><circle cx="25" cy="26" r="18" stroke-dasharray="2 5" opacity=".35"/></svg></div><div><div class="brand-micro">SIMULATION / TACTICAL INTERFACE</div><h1>CYBER <span>OUTBREAK</span><small>v0.6</small></h1><div class="tagline">架空病院 × 情報資産 × ターン制ストラテジー</div></div></div>
   <div class="head-actions"><span class="top-pill"><span class="led"></span> OFFLINE SIMULATION <span class="mono">/ 100% LOCAL</span></span><button type="button" class="small-btn" id="helpBtn">ルール</button><button type="button" class="small-btn" id="restartBtn">最初から</button></div>
 </header>
 
@@ -62,7 +63,7 @@
     <section class="panel awards" id="awardsSection"><div class="awards-heading"><div><h2>アチーブメント</h2><p class="sub">隠し資料と戦略実績を収集。取得状況はこのブラウザだけに保存。</p></div><span class="pill" id="badgeCount">0 / 12</span></div><div class="award-progress"><span id="awardBar"></span></div><div class="award-filters" aria-label="実績表示を切り替える"><button class="filter-btn" data-award-filter="all" aria-pressed="true">すべて</button><button class="filter-btn" data-award-filter="earned" aria-pressed="false">獲得済み</button><button class="filter-btn" data-award-filter="locked" aria-pressed="false">未発見</button></div><div class="award-grid" id="achievementList"></div><button type="button" class="small-btn" id="clearAwardsBtn">実績の記録をリセット</button></section><section class="panel howto"><h2>ゲームの操作</h2><p><b style="color:#eaf4ff">①</b> 緑のノードで模擬データを回収 → <b style="color:#eaf4ff">②</b> 青いノードへ影響を広げる → <b style="color:#eaf4ff">③</b> 継続収入や要求イベントを選択 → <b style="color:#eaf4ff">④</b> 進化に投資 → <b style="color:#eaf4ff">⑤</b> ターン終了。病院側も経路遮断や復旧を実行します。</p><p>防御との関係を学ぶための抽象ゲームです。現実の侵入方法・個人情報・外部通信は含みません。</p></section>
   </div>
 </div>
-<div class="note-footer">CYBER OUTBREAK / TACTICAL CONSOLE v0.5 — EDUCATIONAL FICTION　｜　完全ローカル動作・データ送信なし</div>
+<div class="note-footer">CYBER OUTBREAK / TACTICAL CONSOLE v0.6 — EDUCATIONAL FICTION　｜　完全ローカル動作・データ送信なし</div>
 </div>
 <button class="drawer-backdrop" id="drawerBackdrop" type="button" tabindex="-1" aria-label="パネルを閉じる"></button>
 <aside class="control-drawer" id="controlDrawer" role="dialog" aria-modal="true" aria-labelledby="drawerTitle" aria-hidden="true" inert>
@@ -90,12 +91,20 @@
     <button type="button" id="continuePortraitBtn" class="orientation-continue">縦画面のまま続ける</button>
   </div>
 </div>
+
+<section class="tutorial-guide" id="tutorialGuide" aria-label="初心者向け操作ガイド" aria-live="polite" hidden>
+  <div class="tutorial-guide-top"><span class="tutorial-eyebrow">GUIDED MISSION</span><strong id="tutorialProgress">STEP 1 / 9</strong></div>
+  <div class="tutorial-guide-track"><span id="tutorialProgressBar"></span></div>
+  <h3 id="tutorialTitle">操作を覚えよう</h3>
+  <p id="tutorialDescription">案内に沿って画面を操作してください。</p>
+  <div class="tutorial-guide-actions"><span id="tutorialStatus">指定された場所をタップ</span><button type="button" id="tutorialSkipBtn">チュートリアル終了</button></div>
+</section>
 <div class="overlay" id="intro" role="dialog" aria-modal="true" aria-labelledby="introTitle">
-  <div class="modal"><div class="modal-symbol">⬡</div><div class="overline">OPERATION / GRID ZERO ・ V0.5</div><h2 id="introTitle">CYBER OUTBREAK</h2>
+  <div class="modal"><div class="modal-symbol">⬡</div><div class="overline">OPERATION / GRID ZERO ・ V0.6</div><h2 id="introTitle">CYBER OUTBREAK</h2>
   <p>架空の医療情報ネットワークに影響を広げるターン制戦略ゲーム。模擬データの回収に加えて、仮想サーバーの継続収入や架空の要求イベントも使える戦略ゲーム。病院側は経路遮断や復旧で対抗します。</p>
   <ul><li>「外縁ゲート」から始め、接続が開いている隣接ノードへ進みます。</li><li>選択済みのノードから模擬データを回収し、継続収入設備や進化に投資します。</li><li>病院側は接続を遮断・復旧できます。警戒度100またはターン超過で敗北。隠し実績も探しましょう。</li></ul>
   <div class="difficulty"><label for="difficulty">ゲーム難易度</label><select id="difficulty"><option value="casual">カジュアル — 初めてでも遊びやすい</option><option value="normal" selected>スタンダード — ほどよい駆け引き</option><option value="hard">チャレンジ — 判断が重要</option></select></div>
-  <button class="primary" id="startBtn" type="button">ゲーム開始 →</button><button class="secondary" id="continueBtn" type="button" hidden style="margin-top:9px">現在のゲームに戻る</button><p class="fineprint">現実の侵入経路・手順は扱いません。病院や患者に関する情報は全て架空です。</p></div>
+  <div class="launch-actions"><button class="secondary tutorial-launch" id="tutorialStartBtn" type="button">初心者向けチュートリアル</button><button class="primary" id="startBtn" type="button">ゲーム開始 →</button></div><button class="secondary" id="continueBtn" type="button" hidden style="margin-top:9px">現在のゲームに戻る</button><p class="fineprint">現実の侵入経路・手順は扱いません。病院や患者に関する情報は全て架空です。</p></div>
 </div>
 <div id="toast" role="status" aria-live="polite"></div>
 <div class="overlay" id="result" role="dialog" aria-modal="true" aria-labelledby="resultTitle" hidden>
@@ -107,5 +116,6 @@
 <script src="./js/game-data.js" defer></script>
 <script src="./js/app.js" defer></script>
 <script src="./js/layout.js" defer></script>
+<script src="./js/tutorial.js" defer></script>
 </body>
 </html>

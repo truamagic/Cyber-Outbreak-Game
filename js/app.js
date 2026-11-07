@@ -33,8 +33,11 @@ function setText(id,text){const el=$(id);if(el)el.textContent=text}
 
 const PANEL_INFO={shop:['戦術ショップ','TACTICAL SHOP'],upgrade:['進化研究所','UPGRADE LAB']};
 let activePanel=null,returnFocus=null;
+function tutorialAllows(action,target){return !state?.tutorial||!!window.CyberOutbreakTutorial?.allows?.(action,target)}
+function tutorialSignal(action,target){if(state?.tutorial)window.CyberOutbreakTutorial?.onAction?.(action,target)}
+
 function openPanel(name){
- if(!PANEL_INFO[name]||!$('intro').hidden||!$('result').hidden)return;
+ if(!PANEL_INFO[name]||!$('intro').hidden||!$('result').hidden||!tutorialAllows('panel',name))return;
  if(activePanel===name){closePanel();return}
  if(!activePanel)returnFocus=document.activeElement;
  activePanel=name;
@@ -44,6 +47,7 @@ function openPanel(name){
  const d=$('controlDrawer');d.inert=false;d.setAttribute('aria-hidden','false');d.classList.add('open');
  $('drawerBackdrop').classList.add('open');document.body.classList.add('drawer-open');
  $('closeDrawerBtn').focus({preventScroll:true});
+ tutorialSignal('panel',name);
 }
 function closePanel(restore=true){
  if(!activePanel)return;
@@ -75,7 +79,9 @@ function render(){if(!state)return;
  $('statusChips').innerHTML=`<span class="status-chip">遮断経路 ${state.edges.filter(e=>e.blockedUntil>=state.turn).length}</span><span class="status-chip">継続ユニット ${totalUnits()}/2</span><span class="status-chip">回収 ${state.harvested} IP</span><span class="status-chip">継続収入 ${state.passive} IP</span><span class="status-chip ${state.demandAttempts?'alert':''}">要求イベント ${state.demandIncome} IP</span>`;
  setText('mapStatus',state.ended?'SIMULATION COMPLETE':'ROUND '+String(state.turn).padStart(2,'0')+' / AP '+state.ap);
  updateHUD();
- renderMap();renderDetail();renderUpgrades();renderShop();renderFeed();renderAwards();$('endTurnBtn').disabled=state.ended;
+ renderMap();renderDetail();renderUpgrades();renderShop();renderFeed();renderAwards();$('endTurnBtn').disabled=state.ended||!tutorialAllows('turn','turn');
+ $('openShopBtn').disabled=state.ended||!tutorialAllows('panel','shop');
+ $('openUpgradeBtn').disabled=state.ended||!tutorialAllows('panel','upgrade');
 }
 function svgEl(tag,attrs,parent,text){const el=document.createElementNS(SVG_NS,tag);Object.entries(attrs).forEach(([a,v])=>el.setAttribute(a,v));if(text!==undefined)el.textContent=text;(parent||$('network')).append(el);return el}
 
@@ -150,8 +156,8 @@ function renderDetail(){const n=node(state.selected),active=isActive(n),disconne
  const desc=visible(n)?n.desc:'まだ探索できないノードです。接続経路があるノードから探索を進めてください。';
  const defense=visible(n)?n.security+n.bonusSecurity:0;
  const data=visible(n)?n.left+' IP':'不明';
- const canCollect=n.owned&&active&&n.left>0&&state.ap>0&&!state.ended;
- const canExpand=!n.owned&&reachable(n)&&n.lockedUntil<state.turn&&state.ap>0&&!state.ended;
+ const canCollect=n.owned&&active&&n.left>0&&state.ap>0&&!state.ended&&tutorialAllows('collect',n.id);
+ const canExpand=!n.owned&&reachable(n)&&n.lockedUntil<state.turn&&state.ap>0&&!state.ended&&tutorialAllows('expand',n.id);
  const canInstall=n.owned&&active&&n.server&&n.unitTurns===0&&totalUnits()<2&&state.points>=16&&state.ap>0&&!state.ended;
  const canDemand=n.owned&&active&&!n.demanded&&n.data-n.left>=10&&state.ap>0&&!state.ended;
  const primary=n.owned?(n.left>0?'▤  模擬データ回収  /  1 AP':'模擬データ回収済み'):!visible(n)?'探索範囲外':n.lockedUntil>=state.turn?'一時保護中':!reachable(n)?'経路遮断中':'↗  ノードへ進出  /  1 AP';
@@ -161,16 +167,16 @@ function renderDetail(){const n=node(state.selected),active=isActive(n),disconne
  <div class="kv"><div class="kv-item"><small>DEFENSE / 防御強度</small><div class="defense-pips" aria-label="防御強度 ${defense} / 5">${gems}</div></div><div class="kv-item"><small>SIMULATED DATA / 残量</small><strong>${data}</strong></div></div>
  <div class="detail-note">${disconnected?'病院側が経路を分離中。接続が戻るまで行動・継続収入が停止します。':n.owned&&n.unitTurns>0?'継続収入ユニット設置中。残り '+n.unitTurns+' ターン。':n.owned?'模擬データを回収するか、継続収入・要求イベントを選択できます。':'進出は抽象的な成功・失敗判定で処理します。'}</div>
  <div class="action-stack"><button class="primary" id="nodeAction" type="button" ${canCollect||canExpand?'':'disabled'}>${primary}</button>
- <button class="secondary amber-button" id="nodeShopBtn" type="button">◈ このノードの戦術ショップを開く ↗</button><div class="action-sub">継続収入ユニット、要求イベント、追加行動力はショップから選択します。</div></div>`;
+ <button class="secondary amber-button" id="nodeShopBtn" type="button" ${tutorialAllows("panel","shop")?"":"disabled"}>◈ このノードの戦術ショップを開く ↗</button><div class="action-sub">継続収入ユニット、要求イベント、追加行動力はショップから選択します。</div></div>`;
  $('nodeAction').addEventListener('click',()=>n.owned?collect(n.id):expand(n.id));$('nodeShopBtn').addEventListener('click',()=>openPanel('shop'));
 }
-function renderUpgrades(){$('upgrades').innerHTML=Object.entries(UPGRADES).map(([key,u])=>{const lv=state.up[key],cost=u.costs[lv],ticks=Array.from({length:3},(_,i)=>'<span class="'+(lv>i?'on':'')+'"></span>').join('');return `<div class="upgrade-item"><div class="upgrade-icon" aria-hidden="true">${u.icon}</div><div><div class="upgrade-name">${u.label} <span class="level">LV ${lv} / 3</span></div><div class="upgrade-description">${u.desc}</div><div class="upgrade-ticks">${ticks}</div></div><button class="upgrade-button" data-upgrade="${key}" ${lv>=3||state.points<cost||state.ended?'disabled':''}>${lv>=3?'MAX':cost+' IP'}</button></div>`}).join('');$('upgrades').querySelectorAll('[data-upgrade]').forEach(b=>b.addEventListener('click',()=>buy(b.dataset.upgrade)))}
+function renderUpgrades(){$('upgrades').innerHTML=Object.entries(UPGRADES).map(([key,u])=>{const lv=state.up[key],cost=u.costs[lv],ticks=Array.from({length:3},(_,i)=>'<span class="'+(lv>i?'on':'')+'"></span>').join('');return `<div class="upgrade-item"><div class="upgrade-icon" aria-hidden="true">${u.icon}</div><div><div class="upgrade-name">${u.label} <span class="level">LV ${lv} / 3</span></div><div class="upgrade-description">${u.desc}</div><div class="upgrade-ticks">${ticks}</div></div><button class="upgrade-button" data-upgrade="${key}" ${lv>=3||state.points<cost||state.ended||!tutorialAllows('upgrade',key)?'disabled':''}>${lv>=3?'MAX':cost+' IP'}</button></div>`}).join('');$('upgrades').querySelectorAll('[data-upgrade]').forEach(b=>b.addEventListener('click',()=>buy(b.dataset.upgrade)))}
 
 function renderShop(){
  const n=node(state.selected),active=isActive(n);
- const generator=!state.ended&&n.owned&&active&&n.server&&n.unitTurns===0&&totalUnits()<2&&state.points>=16&&state.ap>0;
- const boost=!state.ended&&state.points>=24&&state.shopBoostedTurn!==state.turn;
- const request=!state.ended&&n.owned&&active&&!n.demanded&&n.data-n.left>=10&&state.ap>0;
+ const generator=!state.ended&&n.owned&&active&&n.server&&n.unitTurns===0&&totalUnits()<2&&state.points>=16&&state.ap>0&&tutorialAllows('install',n.id);
+ const boost=!state.ended&&state.points>=24&&state.shopBoostedTurn!==state.turn&&tutorialAllows('boost','boost');
+ const request=!state.ended&&n.owned&&active&&!n.demanded&&n.data-n.left>=10&&state.ap>0&&tutorialAllows('demand',n.id);
  setText('shopNodeName',visible(n)?n.name:'未発見');
  setText('shopIpBalance',state.points+' IP');
  const list=[
@@ -187,30 +193,30 @@ function renderShop(){
  }));
 }
 function purchaseAction(){
- if(!state||state.ended||state.points<24||state.shopBoostedTurn===state.turn)return;
+ if(!state||state.ended||state.points<24||state.shopBoostedTurn===state.turn||!tutorialAllows('boost','boost'))return;
  state.points-=24;state.ap++;state.shopBoostedTurn=state.turn;
- log('戦術ショップ：24 IPを使って行動力を1補充。','positive');render();
+ log('戦術ショップ：24 IPを使って行動力を1補充。','positive');render();tutorialSignal('boost','boost');
 }
 
 function renderFeed(){$('feed').innerHTML=state.log.map(e=>`<div class="feed-item ${e.kind}"><span class="feed-turn">T${String(e.turn).padStart(2,'0')}</span><span>${e.msg}</span></div>`).join('')}
 function renderAwards(){setText('badgeCount',earned.size+' / '+ALL_AWARDS.length);$('awardBar').style.width=100*earned.size/ALL_AWARDS.length+'%';const list=ALL_AWARDS.filter(a=>awardFilter==='all'||(awardFilter==='earned'?earned.has(a.id):!earned.has(a.id)));$('achievementList').innerHTML=list.length?list.map(a=>{const yes=earned.has(a.id);return `<div class="award ${yes?'obtained':''}"><div class="medal" aria-hidden="true">${yes?a.icon:'?'}</div><div><strong>${yes?a.name:'??? 未発見'}</strong><small>${yes?a.desc:'条件を満たすと解除'}</small></div></div>`}).join(''):'<div class="empty-awards">この条件の実績はありません。</div>'}
 
-function collect(id){if(!state||state.ended||state.ap<1)return;const n=node(id);if(!n||!isActive(n)||n.left<=0)return;
+function collect(id){if(!state||state.ended||state.ap<1||!tutorialAllows('collect',id))return;const n=node(id);if(!n||!isActive(n)||n.left<=0)return;
  const amount=Math.min(n.left,11+state.up.analysis*5);n.left-=amount;state.points+=amount;state.total+=amount;state.harvested+=amount;state.ap--;applyAlert(2);log(n.name+'から模擬データ '+amount+' IPを回収。','positive');
  if(!n.harvestOnce){n.harvestOnce=true;if(n.artifact){const art=ARTIFACTS.find(a=>a.id===n.artifact);earn(art.id);log('隠し記録を発見：「'+art.name+'」','positive')}}
- if(state.harvested>=50)earn('wealth');check();render()}
-function expand(id){if(!state||state.ended||state.ap<1)return;const n=node(id);if(!n||n.owned||!reachable(n)||n.lockedUntil>=state.turn)return;
+ if(state.harvested>=50)earn('wealth');check();render();tutorialSignal('collect',id)}
+function expand(id){if(!state||state.ended||state.ap<1||!tutorialAllows('expand',id))return;const n=node(id);if(!n||n.owned||!reachable(n)||n.lockedUntil>=state.turn)return;
  const chance=Math.min(96,Math.max(39,91-8*(n.security+n.bonusSecurity)+state.up.spread*10-Math.floor(state.alert/29)*2-(state.difficulty==='hard'?6:0)));
- state.ap--;if(Math.random()*100<chance){n.owned=true;applyAlert(3);log(n.name+'に影響が拡大しました（架空判定）。','positive');earn('first')}else{applyAlert(5);log(n.name+'への進出が失敗。病院側の防御が機能しました。','negative')}
- check();render()}
-function install(id){if(!state||state.ended||state.ap<1)return;const n=node(id);if(!n||!isActive(n)||!n.server||n.unitTurns||totalUnits()>=2||state.points<16)return;
+ state.ap--;if((state.tutorial&&id==='office')||Math.random()*100<chance){n.owned=true;applyAlert(3);log(n.name+'に影響が拡大しました（架空判定）。','positive');earn('first')}else{applyAlert(5);log(n.name+'への進出が失敗。病院側の防御が機能しました。','negative')}
+ check();render();if(n.owned)tutorialSignal('expand',id)}
+function install(id){if(!state||state.ended||state.ap<1||!tutorialAllows('install',id))return;const n=node(id);if(!n||!isActive(n)||!n.server||n.unitTurns||totalUnits()>=2||state.points<16)return;
  state.ap--;state.points-=16;n.unitTurns=3;applyAlert(3);log(n.name+'に継続収入ユニットを設置（残り3ターン）。','positive');check();render()}
-function demand(id){if(!state||state.ended||state.ap<1)return;const n=node(id);if(!n||!isActive(n)||n.demanded||n.data-n.left<10)return;
+function demand(id){if(!state||state.ended||state.ap<1||!tutorialAllows('demand',id))return;const n=node(id);if(!n||!isActive(n)||n.demanded||n.data-n.left<10)return;
  n.demanded=true;state.ap--;state.demandAttempts++;
  const chance=Math.max(.25,.70-state.alert/260);const ok=Math.random()<chance;applyAlert(ok?13:17);
  if(ok){const amount=19+Math.min(n.security,3)*6;state.points+=amount;state.total+=amount;state.demandIncome+=amount;log('架空の要求イベント：交渉が成立し '+amount+' IPを獲得。','positive');earn('demand')}else{log('架空の要求イベント：病院側は要求に応じず、警戒が高まりました。','negative')}
  check();render()}
-function buy(key){if(!state||state.ended||!UPGRADES[key])return;const u=UPGRADES[key],lv=state.up[key],cost=u.costs[lv];if(lv>=3||state.points<cost)return;state.points-=cost;state.up[key]++;log(u.label+'をLv.'+state.up[key]+'に強化（-'+cost+' IP）。','positive');render()}
+function buy(key){if(!state||state.ended||!UPGRADES[key]||!tutorialAllows('upgrade',key))return;const u=UPGRADES[key],lv=state.up[key],cost=u.costs[lv];if(lv>=3||state.points<cost)return;state.points-=cost;state.up[key]++;log(u.label+'をLv.'+state.up[key]+'に強化（-'+cost+' IP）。','positive');render();if(state.tutorial&&key==='analysis')closePanel(false);tutorialSignal('upgrade',key)}
 function hospitalTurn(){const t=state.turn;const variant=t%4;
  if(variant===1){isolateRandom();}
  else if(variant===2){fortify();}
@@ -233,17 +239,28 @@ function payGenerators(){for(const n of state.nodes){if(n.unitTurns<=0)continue;
  else{log('継続収入：'+n.name+'は経路分離中のため停止。','negative')}
 }}
 function restoreRoutes(){for(const e of state.edges){if(e.blockedUntil===state.turn-1){log('病院側：'+node(e.a).name+' ⇄ '+node(e.b).name+'の接続を復旧。','info');earn('reconnect')}}}
-function endTurn(){if(!state||state.ended)return;hospitalTurn();if(state.alert>=100){end(false,'病院側の封じ込めが完了しました。');return}
+function endTurn(){if(!state||state.ended||!tutorialAllows('turn','turn'))return;hospitalTurn();if(state.alert>=100){end(false,'病院側の封じ込めが完了しました。');return}
  if(state.turn>=state.rule.maxTurns){end(false,'制限ターンに達しました。');return}
- state.turn++;state.ap=3;restoreRoutes();payGenerators();log('新しいターンが始まりました。','info');check();render();}
+ state.turn++;state.ap=3;restoreRoutes();payGenerators();log('新しいターンが始まりました。','info');check();render();tutorialSignal('turn','turn');}
 function check(){if(!state||state.ended)return;if(state.total>=state.rule.targetIP&&activeCount()>=state.rule.targetNodes)end(true,'仮想情報ポイントと接続中のノード目標を達成しました。');else if(state.alert>=100)end(false,'病院側の封じ込めが完了しました。')}
-function end(won,reason){if(state.ended)return;closePanel(false);state.ended=true;if(won)earn('victory');render();setText('resultIcon',won?'★':'⬡');setText('resultLabel',won?'MISSION COMPLETE':'MISSION ENDED');setText('resultTitle',won?'ミッション達成！':'病院側の防御成功');setText('resultLead',reason+(won?' 次は隠し記録の収集や別の戦略に挑戦できます。':' 行動順序と投資先を調整して再挑戦できます。'));
+function end(won,reason){if(state.ended)return;closePanel(false);window.CyberOutbreakTutorial?.reset?.();state.ended=true;if(won)earn('victory');render();setText('resultIcon',won?'★':'⬡');setText('resultLabel',won?'MISSION COMPLETE':'MISSION ENDED');setText('resultTitle',won?'ミッション達成！':'病院側の防御成功');setText('resultLead',reason+(won?' 次は隠し記録の収集や別の戦略に挑戦できます。':' 行動順序と投資先を調整して再挑戦できます。'));
  setText('resultData',state.total);setText('resultNodes',activeCount());setText('resultTurns',state.turn);
  setText('debriefText','病院側のネットワーク分離は接続関係を断ち、継続収入を停止させました。復旧は影響ノードの状態を戻します。情報管理・監視・BCPを組み合わせた対策が重要です。本ゲームは現実のリスクを数値化したものではありません。');$('result').hidden=false;
 }
-function selectNode(id){if(!state||!node(id))return;state.selected=id;renderMap();renderDetail();renderShop()}
-function startGame(){closePanel(false);const d=$('difficulty').value;hasBegun=true;state=makeState(d);log('架空の病院シミュレーションを開始しました。');log('経路遮断・継続収入・要求イベントと隠し記録を利用できます。');$('intro').hidden=true;$('result').hidden=true;render()}
-function showHelp(){closePanel(false);$('intro').hidden=false;$('continueBtn').hidden=!(hasBegun&&state&&!state.ended);$('startBtn').textContent=hasBegun&&!state.ended?'新しいゲームを開始 →':'ゲーム開始 →'}
+function selectNode(id){if(!state||!node(id)||!tutorialAllows('select',id))return;state.selected=id;renderMap();renderDetail();renderShop();tutorialSignal('select',id)}
+function startGame(){window.CyberOutbreakTutorial?.reset?.();closePanel(false);const d=$('difficulty').value;hasBegun=true;state=makeState(d);log('架空の病院シミュレーションを開始しました。');log('経路遮断・継続収入・要求イベントと隠し記録を利用できます。');$('intro').hidden=true;$('result').hidden=true;render()}
+function startTutorialGame(){
+ if(hasBegun&&state&&!state.ended&&!confirm('現在のゲームは初期化されます。チュートリアルを開始しますか？'))return;
+ closePanel(false);hasBegun=true;state=makeState('casual');
+ state.tutorial=true;state.points=65;
+ // Training-only starting resources; the first step is deterministic.
+ log('練習用IPを付与しました。画面の案内に沿って基本操作を覚えましょう。','info');
+ $('intro').hidden=true;$('result').hidden=true;
+ document.querySelector('[data-landscape-view="node"]')?.click();
+ render();window.CyberOutbreakTutorial?.start?.();
+}
+function leaveTutorial(){if(!state?.tutorial)return;state.tutorial=false;log('チュートリアルを終了。ここから通常のゲームルールで続行できます。');render()}
+function showHelp(){window.CyberOutbreakTutorial?.pause?.();closePanel(false);$('intro').hidden=false;$('continueBtn').hidden=!(hasBegun&&state&&!state.ended);$('startBtn').textContent=hasBegun&&!state.ended?'新しいゲームを開始 →':'ゲーム開始 →'}
 
 document.querySelectorAll('[data-panel]').forEach(b=>b.addEventListener('click',()=>openPanel(b.dataset.panel)));
 $('closeDrawerBtn').addEventListener('click',()=>closePanel());
@@ -252,12 +269,13 @@ $('controlDrawer').addEventListener('keydown',trapPanel);
 
 $('network').addEventListener('click',e=>{const g=e.target.closest('[data-node]');if(g)selectNode(g.dataset.node)});
 $('network').addEventListener('keydown',e=>{if((e.key==='Enter'||e.key===' ')&&e.target.closest('[data-node]')){e.preventDefault();selectNode(e.target.closest('[data-node]').dataset.node)}});
-$('startBtn').addEventListener('click',startGame);$('continueBtn').addEventListener('click',()=>{$('intro').hidden=true});$('endTurnBtn').addEventListener('click',endTurn);
+$('startBtn').addEventListener('click',startGame);$('tutorialStartBtn').addEventListener('click',startTutorialGame);$('continueBtn').addEventListener('click',()=>{$('intro').hidden=true;window.CyberOutbreakTutorial?.resume?.()});$('endTurnBtn').addEventListener('click',endTurn);
 $('againBtn').addEventListener('click',startGame);$('restartBtn').addEventListener('click',()=>{if(state&&!state.ended&&!confirm('現在のゲームを最初からやり直しますか？'))return;showHelp()});$('helpBtn').addEventListener('click',showHelp);$('guideBtn').addEventListener('click',showHelp);
 $('fitMapBtn').addEventListener('click',()=>{const vp=$('mapViewport');const isFit=vp.classList.toggle('fit-map');$('fitMapBtn').setAttribute('aria-pressed',String(isFit));$('fitMapBtn').textContent=isFit?'拡大して見る ↗':'全体表示 ↗';});
  document.querySelectorAll('[data-award-filter]').forEach(btn=>btn.addEventListener('click',()=>{awardFilter=btn.dataset.awardFilter;document.querySelectorAll('[data-award-filter]').forEach(b=>b.setAttribute('aria-pressed',String(b===btn)));renderAwards()}));
  $('clearAwardsBtn').addEventListener('click',()=>{if(!confirm('このブラウザの実績記録をリセットしますか？'))return;earned=new Set();persistEarned();renderAwards()});
  state=makeState('normal');log('ゲーム開始ボタンを押すとプレイできます。');render();
  // デバッグ用。テストから架空の状態のみを確認します。
- window.CyberOutbreakDebug={getState:()=>JSON.parse(JSON.stringify(state)),selectNode,collect,expand,buy,install,demand,purchaseAction,openPanel,closePanel,endTurn,startGame,earned:()=>[...earned]};
+ window.CyberOutbreakGame={refresh:render,leaveTutorial,isTutorial:()=>!!state?.tutorial};
+ window.CyberOutbreakDebug={startTutorialGame,leaveTutorial,getState:()=>JSON.parse(JSON.stringify(state)),selectNode,collect,expand,buy,install,demand,purchaseAction,openPanel,closePanel,endTurn,startGame,earned:()=>[...earned]};
 })();
