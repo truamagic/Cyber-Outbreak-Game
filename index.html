@@ -4,14 +4,15 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#0a1522">
-<title>CYBER OUTBREAK v0.4 | 病院サイバーリスク・シミュレーション</title>
+<title>CYBER OUTBREAK v0.5 | 病院サイバーリスク・シミュレーション</title>
 <link rel="stylesheet" href="./css/styles.css">
 <link rel="stylesheet" href="./css/drawer.css">
+<link rel="stylesheet" href="./css/mobile.css">
 </head>
 <body>
 <div class="wrap">
 <header class="topbar">
-  <div class="brand"><div class="brand-mark"><svg viewBox="0 0 50 50" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="M25 4l17 10v21L25 46 8 35V14z"/><path d="M25 12l11 6v14l-11 7-11-7V18z" opacity=".55"/><path d="M25 18v16M17 26h16" stroke-width="3"/><circle cx="25" cy="26" r="18" stroke-dasharray="2 5" opacity=".35"/></svg></div><div><div class="brand-micro">SIMULATION / TACTICAL INTERFACE</div><h1>CYBER <span>OUTBREAK</span><small>v0.4</small></h1><div class="tagline">架空病院 × 情報資産 × ターン制ストラテジー</div></div></div>
+  <div class="brand"><div class="brand-mark"><svg viewBox="0 0 50 50" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="M25 4l17 10v21L25 46 8 35V14z"/><path d="M25 12l11 6v14l-11 7-11-7V18z" opacity=".55"/><path d="M25 18v16M17 26h16" stroke-width="3"/><circle cx="25" cy="26" r="18" stroke-dasharray="2 5" opacity=".35"/></svg></div><div><div class="brand-micro">SIMULATION / TACTICAL INTERFACE</div><h1>CYBER <span>OUTBREAK</span><small>v0.5</small></h1><div class="tagline">架空病院 × 情報資産 × ターン制ストラテジー</div></div></div>
   <div class="head-actions"><span class="top-pill"><span class="led"></span> OFFLINE SIMULATION <span class="mono">/ 100% LOCAL</span></span><button type="button" class="small-btn" id="helpBtn">ルール</button><button type="button" class="small-btn" id="restartBtn">最初から</button></div>
 </header>
 
@@ -31,11 +32,17 @@
   <section class="panel stat"><span class="stat-ornament" aria-hidden="true">⬡</span><div class="stat-label">NODES / 有効ノード</div><div class="stat-value" id="ownedVal">1 / 8</div><div class="stat-detail" id="ownedHint">目標 5 ノード</div><div class="stat-track"></div></section>
   <section class="panel stat"><span class="stat-ornament" aria-hidden="true">◷</span><div class="stat-label">TURN / ACTION POINTS</div><div class="stat-value gold" id="turnVal">1 / 12</div><div class="stat-detail" id="apHint">残り行動力 3 / 3</div><div class="stat-track"></div></section>
 </div>
-<div class="main">
+<div class="main" data-landscape-tab="node" data-map-only="false">
+  <div class="landscape-tabs" aria-label="操作パネルの表示を切り替える">
+  <button type="button" data-landscape-view="node" aria-pressed="true">ノード</button>
+  <button type="button" data-landscape-view="mission" aria-pressed="false">戦況</button>
+  <button type="button" data-landscape-view="log" aria-pressed="false">ログ</button>
+  <button type="button" data-landscape-view="awards" aria-pressed="false">実績</button>
+</div>
   <div class="left-stack">
     <section class="panel map-panel" id="mapSection">
       <div class="p-head"><div><span class="section-no">01 / TACTICAL NETWORK</span><h2>仮想ネットワークマップ</h2><p class="sub">ノードを直接タップして選択。赤い接続は病院側が分離した経路です。</p></div>
-      <div class="map-actions"><span class="map-live"><span class="dot"></span><span id="mapLinkCount">10 CONNECTIONS</span></span><button type="button" class="map-btn" id="fitMapBtn" aria-pressed="false">全体表示 ↗</button></div></div>
+      <div class="map-actions"><span class="map-live"><span class="dot"></span><span id="mapLinkCount">10 CONNECTIONS</span></span><button type="button" class="map-btn" id="fitMapBtn" aria-pressed="false">全体表示 ↗</button><button type="button" class="map-btn map-maximize-btn" id="mapMaximizeBtn" aria-pressed="false">マップ拡大</button></div></div>
       <div class="map-container" id="mapViewport"><svg id="network" viewBox="0 0 780 410" role="group" aria-label="架空ネットワーク図。ノードを選んで行動を選択できます"></svg></div>
       <div class="map-legend" aria-label="マップ凡例"><span><i class="l-owned"></i>制御中</span><span><i></i>進出可能</span><span><i class="l-fog"></i>未発見</span><span><i class="l-cut"></i>遮断中</span><span style="margin-left:auto" id="mapMode">SIMULATED GRID / 08 NODES</span></div>
       <div class="map-footer"><span class="map-caption">実際の病院ネットワークや攻撃方法を再現したものではありません。</span><span class="map-banner" id="mapStatus">ROUND 01 / AP 3</span></div>
@@ -55,7 +62,7 @@
     <section class="panel awards" id="awardsSection"><div class="awards-heading"><div><h2>アチーブメント</h2><p class="sub">隠し資料と戦略実績を収集。取得状況はこのブラウザだけに保存。</p></div><span class="pill" id="badgeCount">0 / 12</span></div><div class="award-progress"><span id="awardBar"></span></div><div class="award-filters" aria-label="実績表示を切り替える"><button class="filter-btn" data-award-filter="all" aria-pressed="true">すべて</button><button class="filter-btn" data-award-filter="earned" aria-pressed="false">獲得済み</button><button class="filter-btn" data-award-filter="locked" aria-pressed="false">未発見</button></div><div class="award-grid" id="achievementList"></div><button type="button" class="small-btn" id="clearAwardsBtn">実績の記録をリセット</button></section><section class="panel howto"><h2>ゲームの操作</h2><p><b style="color:#eaf4ff">①</b> 緑のノードで模擬データを回収 → <b style="color:#eaf4ff">②</b> 青いノードへ影響を広げる → <b style="color:#eaf4ff">③</b> 継続収入や要求イベントを選択 → <b style="color:#eaf4ff">④</b> 進化に投資 → <b style="color:#eaf4ff">⑤</b> ターン終了。病院側も経路遮断や復旧を実行します。</p><p>防御との関係を学ぶための抽象ゲームです。現実の侵入方法・個人情報・外部通信は含みません。</p></section>
   </div>
 </div>
-<div class="note-footer">CYBER OUTBREAK / TACTICAL CONSOLE v0.4 — EDUCATIONAL FICTION　｜　完全ローカル動作・データ送信なし</div>
+<div class="note-footer">CYBER OUTBREAK / TACTICAL CONSOLE v0.5 — EDUCATIONAL FICTION　｜　完全ローカル動作・データ送信なし</div>
 </div>
 <button class="drawer-backdrop" id="drawerBackdrop" type="button" tabindex="-1" aria-label="パネルを閉じる"></button>
 <aside class="control-drawer" id="controlDrawer" role="dialog" aria-modal="true" aria-labelledby="drawerTitle" aria-hidden="true" inert>
@@ -73,8 +80,18 @@
   </div>
   <footer class="drawer-foot">● 100% OFFLINE · ターン制のため表示中に時間は進みません</footer>
 </aside>
+<div class="orientation-prompt" id="orientationPrompt" role="region" aria-label="横画面でのプレイを推奨">
+  <div class="orientation-card">
+    <div class="orientation-symbol" aria-hidden="true"><span></span></div>
+    <span class="orientation-eyebrow">LANDSCAPE MODE RECOMMENDED</span>
+    <h2>スマートフォンを横画面にしてください</h2>
+    <p>横向きにすると、ネットワークマップと操作パネルを同時に表示できます。</p>
+    <p class="orientation-tip">※ 画面の自動回転がオフの場合は、端末の回転ロックを解除してください。</p>
+    <button type="button" id="continuePortraitBtn" class="orientation-continue">縦画面のまま続ける</button>
+  </div>
+</div>
 <div class="overlay" id="intro" role="dialog" aria-modal="true" aria-labelledby="introTitle">
-  <div class="modal"><div class="modal-symbol">⬡</div><div class="overline">OPERATION / GRID ZERO ・ V0.4</div><h2 id="introTitle">CYBER OUTBREAK</h2>
+  <div class="modal"><div class="modal-symbol">⬡</div><div class="overline">OPERATION / GRID ZERO ・ V0.5</div><h2 id="introTitle">CYBER OUTBREAK</h2>
   <p>架空の医療情報ネットワークに影響を広げるターン制戦略ゲーム。模擬データの回収に加えて、仮想サーバーの継続収入や架空の要求イベントも使える戦略ゲーム。病院側は経路遮断や復旧で対抗します。</p>
   <ul><li>「外縁ゲート」から始め、接続が開いている隣接ノードへ進みます。</li><li>選択済みのノードから模擬データを回収し、継続収入設備や進化に投資します。</li><li>病院側は接続を遮断・復旧できます。警戒度100またはターン超過で敗北。隠し実績も探しましょう。</li></ul>
   <div class="difficulty"><label for="difficulty">ゲーム難易度</label><select id="difficulty"><option value="casual">カジュアル — 初めてでも遊びやすい</option><option value="normal" selected>スタンダード — ほどよい駆け引き</option><option value="hard">チャレンジ — 判断が重要</option></select></div>
@@ -89,5 +106,6 @@
 </div>
 <script src="./js/game-data.js" defer></script>
 <script src="./js/app.js" defer></script>
+<script src="./js/layout.js" defer></script>
 </body>
 </html>
