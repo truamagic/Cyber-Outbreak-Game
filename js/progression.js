@@ -1,4 +1,4 @@
-/* CYBER OUTBREAK v0.7 - fictional profiles and permanent progression */
+/* CYBER OUTBREAK v0.7.3 - fictional profiles and permanent progression */
 (()=>{'use strict';
 const FIELDS=[
  {key:'maintenance',label:'システム保守'},{key:'training',label:'職員教育'},
@@ -25,7 +25,7 @@ const RESEARCH={
 };
 const META_KEY='cyber-outbreak:meta:v07';
 const clamp=(n,min=0,max=100)=>Math.max(min,Math.min(max,Number.isFinite(n)?n:min));
-function emptyMeta(){return {schema:1,rp:0,levels:Object.fromEntries(Object.keys(RESEARCH).map(k=>[k,0])),runs:0,firstClears:{A:false,B:false,C:false,D:false}}}
+function emptyMeta(){return {schema:2,rp:0,levels:Object.fromEntries(Object.keys(RESEARCH).map(k=>[k,0])),runs:0,firstClears:{A:false,B:false,C:false,D:false},claimedRewards:[],ledgerReady:false}}
 function sanitizeMeta(raw){
  const base=emptyMeta();
  if(!raw||typeof raw!=='object'||Array.isArray(raw))return base;
@@ -33,6 +33,12 @@ function sanitizeMeta(raw){
  base.runs=Math.floor(clamp(Number(raw.runs),0,100000));
  for(const [k,r] of Object.entries(RESEARCH))base.levels[k]=Math.floor(clamp(Number(raw.levels?.[k]),0,r.costs.length));
  for(const k of Object.keys(PROFILES))base.firstClears[k]=raw.firstClears?.[k]===true;
+ // Schema 1 can be read without erasing its existing RP, first clears or research.
+ // The separate award reward ledger prevents RP farming via display-only reset.
+ if(Array.isArray(raw.claimedRewards)){
+  base.claimedRewards=[...new Set(raw.claimedRewards.filter(x=>typeof x==='string'&&/^[A-Za-z][A-Za-z0-9_-]{0,63}$/.test(x)))].slice(0,100);
+ }
+ base.ledgerReady=raw.ledgerReady===true;
  return base;
 }
 function loadMeta(storage){try{const store=storage||localStorage;return sanitizeMeta(JSON.parse(store.getItem(META_KEY)||'null'))}catch(_){return emptyMeta()}}
@@ -52,9 +58,13 @@ function chooseOpportunity(m,random=Math.random){
 }
 function impactIndex(m){return Math.round(clamp(Number(m.info))*.35+clamp(Number(m.systems))*.30+clamp(Number(m.financial))*.15+clamp(Number(m.care))*.20)}
 function careContinuity(m){return Math.round(clamp(100-clamp(Number(m.care))*.65-clamp(Number(m.systems))*.2))}
-function runReward(won,turn,harvested,profile,firstClear){
- if(turn<3||harvested<12)return 0;
- return (won?15:3)+(won?(PROFILES[profile]||PROFILES.B).bonusRP:0)+(won&&firstClear?10:0);
+function rewardParts(won,turn,harvested,profile,firstClear){
+ const zero={clear:0,firstClear:0,profile:0,loss:0};
+ if(turn<3||harvested<12)return zero;
+ return won?{clear:15,firstClear:firstClear?10:0,profile:(PROFILES[profile]||PROFILES.B).bonusRP,loss:0}:{...zero,loss:3};
 }
-window.CyberOutbreakProgression=Object.freeze({FIELDS,PROFILES,OPPORTUNITIES,RESEARCH,META_KEY,emptyMeta,sanitizeMeta,loadMeta,saveMeta,initialMaturity,averageMaturity,opportunityChance,chooseOpportunity,impactIndex,careContinuity,runReward,clamp});
+function runReward(won,turn,harvested,profile,firstClear){
+ return Object.values(rewardParts(won,turn,harvested,profile,firstClear)).reduce((a,b)=>a+b,0);
+}
+window.CyberOutbreakProgression=Object.freeze({FIELDS,PROFILES,OPPORTUNITIES,RESEARCH,META_KEY,emptyMeta,sanitizeMeta,loadMeta,saveMeta,initialMaturity,averageMaturity,opportunityChance,chooseOpportunity,impactIndex,careContinuity,rewardParts,runReward,clamp});
 })();

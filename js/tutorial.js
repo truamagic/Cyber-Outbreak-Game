@@ -40,7 +40,7 @@
   target.classList.add('tutorial-spotlight');
   // All steps (including SVG nodes and toolbar commands) must scroll into view.
   if(typeof target.scrollIntoView==='function'){
-   target.scrollIntoView({block:target.matches('[data-node]')?'center':'nearest',inline:'nearest',behavior:'instant'});
+   target.scrollIntoView({block:'center',inline:'nearest',behavior:'auto'});
   }
   const rect=target.getBoundingClientRect();
   const width=Math.min(guide.offsetWidth||350,window.innerWidth-20);
@@ -57,19 +57,28 @@
   corners.sort((a,b)=>overlap(a)-overlap(b));
   guide.dataset.placement=corners[0].name;
   // Focus the live target to support keyboard navigation without triggering it.
-  if(typeof target.focus==='function')target.focus({preventScroll:true});
+  // A drawer can still be entering its visible state when the next guided step begins.
+  // Resolve the live element again after layout to avoid focusing a detached control.
+  requestAnimationFrame(()=>{
+   if(!active||paused||steps[stepIndex]!==step)return;
+   const live=document.querySelector(step.target);
+   if(live){
+    live.scrollIntoView?.({block:'center',inline:'nearest',behavior:'auto'});
+    live.focus?.({preventScroll:true});
+   }
+  });
  }
  function start(){
-  stepIndex=0;active=true;finished=false;paused=false;
+  stepIndex=0;active=true;finished=false;paused=false;document.body.classList.add('tutorial-active');
   document.querySelector('[data-landscape-view="node"]')?.click();
   showStep();
  }
  function reset(){
   active=false;finished=false;paused=false;stepIndex=0;
-  guide.hidden=true;clearHighlight();
+  guide.hidden=true;clearHighlight();document.body.classList.remove('tutorial-active');
  }
- function pause(){if(active){paused=true;guide.hidden=true;clearHighlight()}}
- function resume(){if(active){paused=false;showStep()}}
+ function pause(){if(active){paused=true;guide.hidden=true;clearHighlight();document.body.classList.remove('tutorial-active')}}
+ function resume(){if(active){paused=false;document.body.classList.add('tutorial-active');showStep()}}
  function allows(event,key){
   if(!active)return false;
   const step=steps[stepIndex];
@@ -86,7 +95,7 @@
   stepIndex++;
   if(stepIndex===steps.length){
    active=false;finished=true;
-   clearHighlight();
+   clearHighlight();document.body.classList.remove('tutorial-active');
    window.CyberOutbreakGame?.leaveTutorial?.();
    guide.hidden=false;
    progress.textContent='COMPLETE';

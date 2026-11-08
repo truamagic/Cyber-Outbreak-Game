@@ -22,6 +22,18 @@
   expandButton.setAttribute('aria-pressed',String(expanded));
   expandButton.textContent=expanded?'操作を表示':'マップ拡大';
  });
+ // On a narrow portrait phone, start with the entire map visible. Manual zoom remains available.
+ const portrait=window.matchMedia('(orientation: portrait) and (max-width: 700px) and (pointer: coarse)');
+ function defaultPortraitFit(){
+  if(!portrait.matches)return;
+  const vp=document.getElementById('mapViewport');
+  const button=document.getElementById('fitMapBtn');
+  if(vp&&!vp.classList.contains('fit-map')){
+   vp.classList.add('fit-map');button.setAttribute('aria-pressed','true');
+   button.textContent='拡大して見る ↗';
+  }
+ }
+ defaultPortraitFit();
  const network=document.getElementById('network');
  network.addEventListener('click',e=>{if(e.target.closest('[data-node]'))setPanel('node')});
  network.addEventListener('keydown',e=>{if((e.key==='Enter'||e.key===' ')&&e.target.closest('[data-node]'))setPanel('node')});

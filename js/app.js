@@ -9,16 +9,24 @@ const ALL_AWARDS=[...MILESTONES,...ARTIFACTS.map(a=>({...a,icon:'▣'}))];
 const STORAGE_KEY='cyber-outbreak:achievements:v02';
 let state=null,hasBegun=false;let awardFilter='all',lastToastKey='',toastTimer=null;
 let earned=readEarned();
+function saveFailed(){const e=$('storageNotice');if(e){e.hidden=false;e.textContent='保存に失敗しました。RP・実績・研究が失われる可能性があります。研究画面からJSONバックアップを保存してください。'}}
+function persistMeta(){const ok=PROG.saveMeta(meta);if(!ok)saveFailed();return ok}
+function migrateClaims(){if(meta.ledgerReady)return;meta.claimedRewards=[...new Set([...(meta.claimedRewards||[]),...earned])];meta.ledgerReady=true;persistMeta()}
+migrateClaims();
 function readEarned(){try{const value=JSON.parse(localStorage.getItem(STORAGE_KEY)||'[]');return new Set(Array.isArray(value)?value.filter(v=>ALL_AWARDS.some(a=>a.id===v)):[])}catch(_){return new Set()}}
-function persistEarned(){try{localStorage.setItem(STORAGE_KEY,JSON.stringify([...earned]))}catch(_){/* local data may be disabled */}}
-function earn(id){if(state?.wasTutorial||state?.tutorial||!ALL_AWARDS.some(a=>a.id===id)||earned.has(id))return;earned.add(id);persistEarned();const a=ALL_AWARDS.find(a=>a.id===id);log('実績解除：「'+a.name+'」','positive');addRP(5,'achievements')}
-function addRP(amount,category='achievements'){if(amount<=0)return;meta.rp=Math.min(100000,meta.rp+amount);if(state){state.rpEarned=(state.rpEarned||0)+amount;if(state.rpBreakdown&&Object.hasOwn(state.rpBreakdown,category))state.rpBreakdown[category]+=amount}PROG.saveMeta(meta)}
+function persistEarned(){try{localStorage.setItem(STORAGE_KEY,JSON.stringify([...earned]));return true}catch(_){saveFailed();return false}}
+function earn(id){
+ if(state?.wasTutorial||state?.tutorial||!ALL_AWARDS.some(a=>a.id===id)||earned.has(id))return;
+ earned.add(id);persistEarned();const a=ALL_AWARDS.find(a=>a.id===id);log('実績解除：「'+a.name+'」','positive');
+ if(!meta.claimedRewards.includes(id)){meta.claimedRewards.push(id);addRP(5,'achievements')}
+}
+function addRP(amount,category='achievements'){if(amount<=0)return;meta.rp=Math.min(100000,meta.rp+amount);if(state){state.rpEarned=(state.rpEarned||0)+amount;if(state.rpBreakdown&&Object.hasOwn(state.rpBreakdown,category))state.rpBreakdown[category]+=amount}persistMeta()}
 function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
 function makeState(difficulty='normal',profileId='B'){
  const chosenProfile=PROG.PROFILES[profileId]?profileId:'B';
  const rule=RULES[difficulty]||RULES.normal;const artifacts=shuffle(ARTIFACTS.map(a=>a.id)).slice(0,3),targets=shuffle(MAP.filter(n=>n.id!=='gate').map(n=>n.id)).slice(0,3);
  const artifactsOnNodes=Object.fromEntries(targets.map((id,i)=>[id,artifacts[i]]));
- return {difficulty,rule,turn:1,ap:3+meta.levels.initiative,points:rule.startIP+5*meta.levels.funding,total:0,harvested:0,passive:0,demandIncome:0,alert:Math.max(0,rule.startAlert-2*meta.levels.readiness),selected:'gate',up:{spread:0,analysis:0,adapt:0,sustain:0},
+ return {difficulty,rule,turn:1,ap:3+meta.levels.initiative,initialAP:3+meta.levels.initiative,points:rule.startIP+5*meta.levels.funding,total:0,harvested:0,passive:0,demandIncome:0,alert:Math.max(0,rule.startAlert-2*meta.levels.readiness),selected:'gate',up:{spread:0,analysis:0,adapt:0,sustain:0},
  nodes:MAP.map(n=>({...n,left:n.data,owned:n.id==='gate',bonusSecurity:0,lockedUntil:0,unitTurns:0,demanded:false,harvestOnce:false,artifact:artifactsOnNodes[n.id]||null})),
  edges:EDGES.map(([a,b])=>({a,b,blockedUntil:0})),log:[],ended:false,started:true,demandAttempts:0,unitsEarned:0,shopBoostedTurn:0,
  profileId:chosenProfile,maturity:PROG.initialMaturity(chosenProfile),opportunity:null,opportunitiesSeen:0,opportunitiesUsed:0,opportunityBonus:0,
@@ -37,8 +45,10 @@ function log(msg,kind='info'){state.log.unshift({turn:state.turn,msg,kind});stat
 function applyAlert(value){const monitoring=state.maturity?.monitoring??50;state.alert=Math.max(0,Math.min(100,state.alert+Math.max(1,Math.round(value*state.rule.alertFactor*(.72+.28*monitoring/100))-state.up.adapt)))}
 function setText(id,text){const el=$(id);if(el)el.textContent=text}
 
+const DIFFICULTY_LABELS={casual:'カジュアル',normal:'スタンダード',hard:'チャレンジ'};
 const PANEL_INFO={shop:['戦術ショップ','TACTICAL SHOP'],upgrade:['進化研究所','UPGRADE LAB'],research:['永続研究所','PERMANENT RESEARCH']};
 let activePanel=null,returnFocus=null;
+const mainWrap=document.querySelector('.wrap');
 function tutorialAllows(action,target){return !state?.tutorial||!!window.CyberOutbreakTutorial?.allows?.(action,target)}
 function tutorialSignal(action,target){if(state?.tutorial)window.CyberOutbreakTutorial?.onAction?.(action,target)}
 
@@ -53,33 +63,37 @@ function openPanel(name){
  document.querySelectorAll('[data-panel-view]').forEach(v=>v.hidden=v.dataset.panelView!==name);
  document.querySelectorAll('[data-panel]').forEach(b=>b.setAttribute('aria-expanded',String(b.dataset.panel===name)));
  const d=$('controlDrawer');d.inert=false;d.setAttribute('aria-hidden','false');d.classList.add('open');
- $('drawerBackdrop').classList.add('open');document.body.classList.add('drawer-open');
- $('closeDrawerBtn').focus({preventScroll:true});
+ $('drawerBackdrop').classList.add('open');document.body.classList.add('drawer-open');mainWrap.inert=true;
+ requestAnimationFrame(()=>{if(activePanel===name)$('closeDrawerBtn').focus({preventScroll:true})});
  tutorialSignal('panel',name);
 }
 function closePanel(restore=true){
  if(!activePanel)return;
- activePanel=null;
- const d=$('controlDrawer');d.classList.remove('open');d.setAttribute('aria-hidden','true');
- $('drawerBackdrop').classList.remove('open');document.body.classList.remove('drawer-open');
+ activePanel=null;const d=$('controlDrawer');
+ d.classList.remove('open');$('drawerBackdrop').classList.remove('open');
  document.querySelectorAll('[data-panel]').forEach(b=>b.setAttribute('aria-expanded','false'));
+ d.setAttribute('aria-hidden','true');d.inert=true;
+ document.body.classList.remove('drawer-open');
+ mainWrap.inert=!!window.CyberOutbreakDialogs?.getActive?.();
  const focus=returnFocus;returnFocus=null;
- if(restore&&focus&&focus.isConnected)focus.focus({preventScroll:true});
- d.inert=true;
+ if(restore&&focus?.isConnected)focus.focus({preventScroll:true});
 }
 function trapPanel(e){
- if(e.key==='Escape'){e.preventDefault();closePanel();return}
- if(e.key!=='Tab'||!activePanel)return;
- const focusable=[...$('controlDrawer').querySelectorAll('button:not([disabled])')].filter(el=>!el.closest('[hidden]'));
- if(!focusable.length)return;
- const first=focusable[0],last=focusable[focusable.length-1];
- if(e.shiftKey&&document.activeElement===first){e.preventDefault();last.focus()}
- else if(!e.shiftKey&&document.activeElement===last){e.preventDefault();first.focus()}
+ if(!activePanel)return;
+ const root=$('controlDrawer');
+ if(e.key==='Escape'){e.preventDefault();e.stopPropagation();closePanel();return}
+ if(e.key!=='Tab')return;
+ const focusable=[...root.querySelectorAll('button:not(:disabled),a[href],input:not(:disabled)')].filter(el=>!el.hidden&&!el.closest('[hidden]')&&el.getClientRects().length>0);
+ if(!focusable.length){e.preventDefault();$('closeDrawerBtn').focus();return}
+ const first=focusable[0],last=focusable[focusable.length-1],current=document.activeElement;
+ if(!root.contains(current)){e.preventDefault();(e.shiftKey?last:first).focus();return}
+ if(e.shiftKey&&current===first){e.preventDefault();last.focus()}
+ else if(!e.shiftKey&&current===last){e.preventDefault();first.focus()}
 }
 
 function render(){if(!state)return;
  setText('pointsVal',state.points+' IP');setText('shopHeaderPoints',state.points+' IP');setText('metaHeaderRP',meta.rp+' RP');setText('metaIntro','研究ポイント：'+meta.rp+' RP / 次の攻略に引き継ぎ');setText('harvestVal',state.total+' IP');setText('ownedVal',activeCount()+' / '+state.nodes.length);setText('turnVal',state.turn+' / '+state.rule.maxTurns);
- setText('incomeHint','継続収入 '+state.nodes.filter(n=>n.unitTurns>0&&isActive(n)).length+' 台稼働');setText('apHint','残り行動力 '+('● '.repeat(state.ap)||'なし')+'('+state.ap+'/3)');
+ setText('incomeHint','継続収入 '+state.nodes.filter(n=>n.unitTurns>0&&isActive(n)).length+' 台稼働');const initialAP=state.turn===1?state.initialAP:3;const granted=initialAP+(state.shopBoostedTurn===state.turn?1:0);setText('apHint','残り '+state.ap+' AP（このターンの付与 '+granted+' AP）');
  setText('harvestHint','目標 '+state.rule.targetIP+' IP（全収入）');setText('ownedHint','接続中の目標 '+state.rule.targetNodes+' ノード');
  setText('goalIPText',state.total+' / '+state.rule.targetIP+' IP');setText('goalNodeText',activeCount()+' / '+state.rule.targetNodes);setText('alertText',state.alert+' / 100');
  $('goalIPBar').style.width=Math.min(100,state.total/state.rule.targetIP*100)+'%';$('goalNodeBar').style.width=Math.min(100,activeCount()/state.rule.targetNodes*100)+'%';$('alertBar').style.width=state.alert+'%';
@@ -150,8 +164,8 @@ function renderMap(){
   const cls='node '+(!isVisible?'is-hidden':n.owned?'is-owned':'is-reachable')+(isolated?' is-isolated':'')+(n.id===state.selected?' is-selected':'')+(protectedNode?' is-locked':'')+(n.unitTurns>0?' is-generator':'');
   const g=svgEl('g',{class:cls,'data-node':n.id,role:'button',tabindex:0,'aria-label':(isVisible?n.name:'未発見ノード')+'を選択'},svg);
   svgEl('circle',{class:'pulse',cx:n.x,cy:n.y,r:52},g);
-  svgEl('rect',{class:'selection',x:n.x-70,y:n.y-43,width:140,height:85,rx:13},g);
-  svgEl('rect',{class:'tile',x:n.x-65,y:n.y-38,width:130,height:75,rx:11},g);
+  svgEl('rect',{class:'selection',x:n.x-76,y:n.y-52,width:152,height:104,rx:13},g);
+  svgEl('rect',{class:'tile',x:n.x-72,y:n.y-49,width:144,height:98,rx:11},g);
   svgEl('rect',{class:'node-indicator',x:n.x-60,y:n.y-32,width:3,height:64,rx:2},g);
   nodeGraphic(g,n,isVisible);
   const txt=(value,x,y,cls)=>svgEl('text',{class:cls,x,y,'text-anchor':'start'},g,value);
@@ -214,7 +228,7 @@ function buyResearch(key){
  if(state?.tutorial||!PROG.RESEARCH[key])return;
  const research=PROG.RESEARCH[key],level=meta.levels[key],cost=research.costs[level];
  if(level>=research.costs.length||!Number.isFinite(cost)||meta.rp<cost)return;
- meta.rp-=cost;meta.levels[key]++;PROG.saveMeta(meta);
+ meta.rp-=cost;meta.levels[key]++;persistMeta();
  if(state)log(research.label+'の永続研究Lv.'+meta.levels[key]+'を解放（次の攻略から適用）。','positive');
  earn('firstResearch');render();
 }
@@ -242,10 +256,10 @@ function importMetaFile(file){
  reader.onload=()=>{
   try{
    const data=JSON.parse(String(reader.result||''));
-   if(data?.game!=='CYBER OUTBREAK'||data?.schema!==1||!data.levels||!Number.isFinite(data.rp))throw Error('format');
+   if(data?.game!=='CYBER OUTBREAK'||![1,2].includes(data?.schema)||!data.levels||!Number.isFinite(data.rp))throw Error('format');
    if(!confirm('現在のRP・永続研究をこのセーブデータで置き換えますか？'))return;
-   meta=PROG.sanitizeMeta(data);PROG.saveMeta(meta);render();
-   alert('研究データを復元しました。効果は次の攻略から反映されます。');
+   meta=PROG.sanitizeMeta(data);migrateClaims();const saved=persistMeta();render();
+   alert(saved?'研究データを復元しました。効果は次の攻略から反映されます。':'データを読み込みましたが保存に失敗しました。JSONを保存してください。');
   }catch(_){alert('正しいCYBER OUTBREAKセーブデータを読み込めませんでした。')}
  };
  reader.readAsText(file);
@@ -273,10 +287,10 @@ function renderOpportunity(){
  $('opportunityBadge').classList.toggle('active',!!event);
  if(event){
   const remain=Math.max(0,state.opportunity.expiresTurn-state.turn+1);
-  setText('opportunityBadge','あと'+remain+'ターン');
+  setText('opportunityBadge','あと'+remain+'ターン');setText('opportunityTabBtn','好機 ●');$('opportunityTabBtn').classList.add('has-opportunity');
   $('opportunityBody').innerHTML='<h3>'+event.title+'</h3><p>'+event.description+'</p><p class="opportunity-timer">残り'+remain+'ターン / 成功時 +'+event.bonus+' IP</p><p>行動力1を消費。成功は保証されず、病院側の警戒が高まります。</p>';
  }else{
-  setText('opportunityBadge','OPPORTUNITY');
+  setText('opportunityBadge','OPPORTUNITY');setText('opportunityTabBtn','好機');$('opportunityTabBtn').classList.remove('has-opportunity');
   $('opportunityBody').innerHTML='<p>現在は好機の発生待ちです。管理水準が低いほど発生しやすく、充実した病院でも発生率はゼロではありません。</p>';
  }
  $('opportunityUseBtn').disabled=state.ended||!!state.tutorial||!event||state.ap<1;
@@ -291,7 +305,7 @@ function rollOpportunity(){
  state.opportunity={id:e.id,expiresTurn:state.turn+1+state.forecastLevel};
  state.opportunitiesSeen++;
  log('期間限定の好機が発生：「'+e.title+'」。好機タブを確認。','positive');
- document.querySelector('[data-landscape-view="opportunity"]')?.click();
+ // Keep the current tab visible and notify via opportunity tab indicator.
 }
 function useOpportunity(){
  if(!state||state.ended||state.tutorial||state.ap<1||!state.opportunity)return;
@@ -353,7 +367,7 @@ function restoreRoutes(){for(const e of state.edges){if(e.blockedUntil===state.t
 function endTurn(){if(!state||state.ended||!tutorialAllows('turn','turn'))return;hospitalTurn();if(state.alert>=100){end(false,'病院側の封じ込めが完了しました。');return}
  if(state.turn>=state.rule.maxTurns){end(false,'制限ターンに達しました。');return}
  state.turn++;state.ap=3;restoreRoutes();payGenerators();advanceOpportunity();log('新しいターンが始まりました。','info');rollOpportunity();check();render();tutorialSignal('turn','turn');}
-function check(){if(!state||state.ended)return;if(state.total>=state.rule.targetIP&&activeCount()>=state.rule.targetNodes)end(true,'仮想情報ポイントと接続中のノード目標を達成しました。');else if(state.alert>=100)end(false,'病院側の封じ込めが完了しました。')}
+function check(){if(!state||state.ended)return;if(state.alert>=100)end(false,'病院側の封じ込めが完了しました。');else if(state.total>=state.rule.targetIP&&activeCount()>=state.rule.targetNodes)end(true,'仮想情報ポイントと接続中のノード目標を達成しました。')}
 function debriefSummary(){
  const d=state.defenseHistory,notes=[];
  if(!d.isolations)notes.push('今回、ネットワーク分離は記録されませんでした。');
@@ -369,17 +383,16 @@ function end(won,reason){
  if(!state.wasTutorial){
   if(won)earn('victory');
   const first=won&&!meta.firstClears[state.profileId];
-  if(state.turn>=3&&state.harvested>=12){
+  const parts=PROG.rewardParts(won,state.turn,state.harvested,state.profileId,first);
+  if(Object.values(parts).some(v=>v>0)){
    meta.runs++;
-   if(won){
-    addRP(15,'clear');
-    if(first)addRP(10,'firstClear');
-    addRP(PROG.PROFILES[state.profileId].bonusRP,'profile');
-    meta.firstClears[state.profileId]=true;
-    log('攻略報酬を獲得。内訳は結果画面を参照。','positive');
-   }else{addRP(3,'loss');log('攻略報酬：失敗分3 RPを獲得。','positive')}
+   if(won)meta.firstClears[state.profileId]=true;
+   for(const [category,amount] of Object.entries(parts))addRP(amount,category);
+   log('攻略報酬：'+PROG.runReward(won,state.turn,state.harvested,state.profileId,first)+' RP（内訳は結果画面参照）。','positive');
   }
   if(won&&state.profileId==='A')earn('secureClear');
+  // Persist all fields together, including firstClears updated after RP grants.
+  persistMeta();
  }
  render();
  setText('resultIcon',won?'★':'⬡');setText('resultLabel',won?'MISSION COMPLETE':'MISSION ENDED');
@@ -394,7 +407,7 @@ function end(won,reason){
  setText('resultRPDetails','実績 '+r.achievements+' ＋ 成功 '+r.clear+' ＋ 初回 '+r.firstClear+' ＋ 病院 '+r.profile+' ＋ 失敗 '+r.loss+' ＝ '+state.rpEarned+' RP');
  setText('debriefText',debriefSummary());
  const tutorial=state.wasTutorial;
- setText('resultSettings',(tutorial?'練習開始':'通常開始')+'／'+(tutorial?'カジュアル':state.difficulty)+'／'+PROG.PROFILES[state.profileId].label+'／目標'+state.rule.targetIP+' IP・'+state.rule.targetNodes+'ノード・期限'+state.rule.maxTurns+'ターン');
+ setText('resultSettings',(tutorial?'練習開始':'通常開始')+'／'+(tutorial?'カジュアル':DIFFICULTY_LABELS[state.difficulty])+'／'+PROG.PROFILES[state.profileId].label+'／目標'+state.rule.targetIP+' IP・'+state.rule.targetNodes+'ノード・期限'+state.rule.maxTurns+'ターン');
  setText('againBtn',tutorial?'練習を最初からやり直す':'同設定でもう一度プレイ');
  if(tutorial)setText('resultRewardNote','この攻略は練習から始まったため、続行後もRP・実績保存の対象外です。');
  else setText('resultRewardNote','RPは攻略報酬と初回実績報酬の合計です。');
@@ -405,12 +418,12 @@ function startGame(){window.CyberOutbreakTutorial?.reset?.();closePanel(false);c
 function startTutorialGame(){
  if(hasBegun&&state&&!state.ended&&!confirm('現在のゲームは初期化されます。チュートリアルを開始しますか？'))return;
  closePanel(false);hasBegun=true;state=makeState('casual');
- state.tutorial=true;state.wasTutorial=true;state.points=65;state.ap=3;state.alert=state.rule.startAlert;
+ state.tutorial=true;state.wasTutorial=true;state.points=65;state.ap=3;state.initialAP=3;state.alert=state.rule.startAlert;
  // Training-only starting resources; the first step is deterministic.
  log('練習用IPを付与しました。画面の案内に沿って基本操作を覚えましょう。','info');
  $('intro').hidden=true;$('result').hidden=true;
  document.querySelector('[data-landscape-view="node"]')?.click();
- render();window.CyberOutbreakTutorial?.start?.();
+ render();window.CyberOutbreakDialogs?.hide?.();window.CyberOutbreakTutorial?.start?.();
 }
 function leaveTutorial(){if(!state?.tutorial)return;state.tutorial=false;log('チュートリアルを終了。ここから通常のゲームルールで続行できます。');render()}
 function replaySameSettings(){if(!state)return;const practiced=state.wasTutorial;const d=state.difficulty,profile=state.profileId;if(practiced){startTutorialGame();return}$('difficulty').value=d;$('hospitalProfile').value=profile;startGame()}
@@ -420,7 +433,7 @@ function showHelp(){window.CyberOutbreakTutorial?.pause?.();closePanel(false);$(
 document.querySelectorAll('[data-panel]').forEach(b=>b.addEventListener('click',()=>openPanel(b.dataset.panel)));
 $('closeDrawerBtn').addEventListener('click',()=>closePanel());
 $('drawerBackdrop').addEventListener('click',()=>closePanel());
-$('controlDrawer').addEventListener('keydown',trapPanel);
+document.addEventListener('keydown',e=>{if(activePanel)trapPanel(e)},true);
 $('opportunityUseBtn').addEventListener('click',useOpportunity);
 $('opportunityPassBtn').addEventListener('click',passOpportunity);
 $('exportMetaBtn').addEventListener('click',exportMeta);
@@ -433,9 +446,9 @@ $('startBtn').addEventListener('click',startGame);$('tutorialStartBtn').addEvent
 $('againBtn').addEventListener('click',replaySameSettings);$('resultMenuBtn').addEventListener('click',resultToMenu);$('restartBtn').addEventListener('click',()=>{if(state&&!state.ended&&!confirm('現在のゲームを最初からやり直しますか？'))return;showHelp()});$('helpBtn').addEventListener('click',showHelp);$('guideBtn').addEventListener('click',showHelp);
 $('fitMapBtn').addEventListener('click',()=>{const vp=$('mapViewport');const isFit=vp.classList.toggle('fit-map');$('fitMapBtn').setAttribute('aria-pressed',String(isFit));$('fitMapBtn').textContent=isFit?'拡大して見る ↗':'全体表示 ↗';});
  document.querySelectorAll('[data-award-filter]').forEach(btn=>btn.addEventListener('click',()=>{awardFilter=btn.dataset.awardFilter;document.querySelectorAll('[data-award-filter]').forEach(b=>b.setAttribute('aria-pressed',String(b===btn)));renderAwards()}));
- $('clearAwardsBtn').addEventListener('click',()=>{if(!confirm('このブラウザの実績記録をリセットしますか？'))return;earned=new Set();persistEarned();renderAwards()});
+ $('clearAwardsBtn').addEventListener('click',()=>{if(!confirm('表示用の実績記録をリセットしますか？RPと報酬受取済み履歴は保持し、同じ実績を再取得してもRPは再付与されません。'))return;earned=new Set();persistEarned();renderAwards()});
  state=makeState('normal');log('ゲーム開始ボタンを押すとプレイできます。');render();
  // デバッグ用。テストから架空の状態のみを確認します。
  window.CyberOutbreakGame={refresh:render,leaveTutorial,isTutorial:()=>!!state?.tutorial};
- window.CyberOutbreakDebug={startTutorialGame,leaveTutorial,useOpportunity,passOpportunity,rollOpportunity,buyResearch,getMeta:()=>JSON.parse(JSON.stringify(meta)),getState:()=>JSON.parse(JSON.stringify(state)),selectNode,collect,expand,buy,install,demand,purchaseAction,openPanel,closePanel,endTurn,startGame,earned:()=>[...earned]};
+ window.CyberOutbreakDebug={getSaveState:()=>({meta:JSON.parse(JSON.stringify(meta)),earned:[...earned]}),startTutorialGame,leaveTutorial,useOpportunity,passOpportunity,rollOpportunity,buyResearch,getMeta:()=>JSON.parse(JSON.stringify(meta)),getState:()=>JSON.parse(JSON.stringify(state)),selectNode,collect,expand,buy,install,demand,purchaseAction,openPanel,closePanel,endTurn,startGame,earned:()=>[...earned]};
 })();
